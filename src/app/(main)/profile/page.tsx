@@ -147,13 +147,12 @@ export default function ProfilePage() {
       const userDocRef = doc(db, 'users', user.uid);
       await setDoc(userDocRef, { mobile, address }, { merge: true });
 
-      await fetchUserProfile(user.uid);
-      
-      // Manually update user displayName in local state to re-render layout
+      // This ensures the local user object and related state is refreshed
+      await auth.currentUser?.reload();
       if (auth.currentUser) {
-        // Create a new object to force re-render
         setUser({ ...auth.currentUser });
       }
+      await fetchUserProfile(user.uid);
       
       setDialog({
         isOpen: true,
@@ -456,3 +455,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

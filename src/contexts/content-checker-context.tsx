@@ -2,7 +2,7 @@
 
 'use client';
 
-import { createContext, useContext, useActionState, useCallback } from 'react';
+import { createContext, useContext, useCallback } from 'react';
 import * as React from 'react';
 import { checkContentAction, type AnalysisState } from '@/app/actions/check-content-action';
 
@@ -31,6 +31,7 @@ function ProviderWithReset({
   const [pending, startTransition] = React.useTransition();
 
   const performAction = async (formData: FormData) => {
+    // Pass the previous state to the action
     const newState = await checkContentAction(analysisState, formData);
     setAnalysisState(newState);
   };
@@ -41,9 +42,9 @@ function ProviderWithReset({
       });
   };
 
-  const resetAnalysis = () => {
+  const resetAnalysis = useCallback(() => {
       setAnalysisState(initialState);
-  }
+  }, []);
 
   const value = {
       analysisState: {...analysisState, status: pending ? 'loading' : analysisState.status} as AnalysisState,

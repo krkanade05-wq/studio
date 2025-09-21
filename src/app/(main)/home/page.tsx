@@ -45,7 +45,6 @@ import {
 import { useState, useEffect, useActionState, useRef } from 'react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
-import { usePathname } from 'next/navigation';
 
 import AnalysisResult from '@/components/home/analysis-result';
 import GenerateReply from '@/components/home/generate-reply';
@@ -94,12 +93,13 @@ function ContentChecker() {
     }, []);
 
     useEffect(() => {
-        // The cleanup function of this effect will run when the component unmounts,
+        // This effect will run when the component mounts.
+        // The cleanup function will run when the component unmounts,
         // which happens when the user navigates to a different page.
         return () => {
           resetAnalysis();
         };
-      }, [resetAnalysis]);
+      }, [resetAnalysis]); // Only depends on resetAnalysis, which is stable.
 
     const handleTabChange = (value: string) => {
       setActiveTab(value);

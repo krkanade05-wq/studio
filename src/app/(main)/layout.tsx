@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -15,13 +14,12 @@ import {
 } from '@/components/ui/sidebar';
 import {
   FileText,
-  LayoutDashboard,
+  Home,
   LifeBuoy,
   User,
   PanelLeft,
   ShieldCheck,
   Loader2,
-  Home,
   LogOut,
 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -41,10 +39,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { getAuth, signOut } from 'firebase/auth';
 import { app } from '@/lib/firebase/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
+import { ContentCheckerProvider } from '@/contexts/content-checker-context';
+
 
 type LoadingContextType = {
   isLoading: boolean;
@@ -129,8 +129,7 @@ const useLoading = () => {
 const NavButton = ({ href, children, tooltip }: { href: string; children: React.ReactNode, tooltip: {children: string} }) => {
   const pathname = usePathname();
   const { showLoading } = useLoading();
-  const isActive = pathname === href || (href.startsWith('/dashboard') && pathname.startsWith('/dashboard'));
-
+  const isActive = pathname === href;
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -154,67 +153,67 @@ const NavButton = ({ href, children, tooltip }: { href: string; children: React.
 };
 
 
-export default function DashboardLayout({
+export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-    const router = useRouter();
-    const { toast } = useToast();
-    const auth = getAuth(app);
-    
-    const handleSignOut = async () => {
-        try {
-        await signOut(auth);
-        router.push('/sign-in');
-        } catch (error) {
-        console.error('Sign Out Error', error);
-        toast({
-            title: 'Error Signing Out',
-            description: 'An unexpected error occurred.',
-            variant: 'destructive'
-        })
-        }
-    };
+  const router = useRouter();
+  const { toast } = useToast();
+  const auth = getAuth(app);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push('/sign-in');
+    } catch (error) {
+      console.error('Sign Out Error', error);
+      toast({
+        title: 'Error Signing Out',
+        description: 'An unexpected error occurred.',
+        variant: 'destructive'
+      })
+    }
+  };
 
   return (
     <LoadingProvider>
         <SidebarProvider>
         <Sidebar>
             <SidebarContent>
-            <SidebarHeader>
-                <div className="flex items-center gap-2">
-                <ShieldCheck className="h-6 w-6 text-primary" />
-                <h1 className="text-xl font-semibold">Content Checker</h1>
-                </div>
-            </SidebarHeader>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <NavButton href="/home" tooltip={{ children: 'Home' }}>
-                        <Home />
-                        Home
-                    </NavButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <NavButton href="/dashboard/report-content" tooltip={{ children: 'Report Content' }}>
-                        <FileText />
-                        Reports
-                    </NavButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                     <NavButton href="/dashboard/learn" tooltip={{ children: 'Learn' }}>
-                        <LifeBuoy />
-                        Learn
-                    </NavButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <NavButton href="/dashboard/profile" tooltip={{ children: 'Profile' }}>
-                        <User />
-                        Profile
-                    </NavButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-            <div className='mt-auto'>
+              <SidebarHeader>
+                  <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-6 w-6 text-primary" />
+                  <h1 className="text-xl font-semibold">Content Checker</h1>
+                  </div>
+              </SidebarHeader>
+              <SidebarMenu>
+                  <SidebarMenuItem>
+                      <NavButton href="/home" tooltip={{ children: 'Home' }}>
+                          <Home />
+                          Home
+                      </NavButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                      <NavButton href="/dashboard/report-content" tooltip={{ children: 'Report Content' }}>
+                          <FileText />
+                          Reports
+                      </NavButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                      <NavButton href="/dashboard/learn" tooltip={{ children: 'Learn' }}>
+                          <LifeBuoy />
+                          Learn
+                      </NavButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                      <NavButton href="/dashboard/profile" tooltip={{ children: 'Profile' }}>
+                          <User />
+                          Profile
+                      </NavButton>
+                  </SidebarMenuItem>
+              </SidebarMenu>
+              <div className='mt-auto'>
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <Button onClick={handleSignOut} variant="ghost" className="w-full justify-start">
@@ -236,7 +235,9 @@ export default function DashboardLayout({
                 <PanelLeft />
             </SidebarTrigger>
             </header>
-            <div className="flex-1 overflow-y-auto">{children}</div>
+            <ContentCheckerProvider>
+                <div className="flex-1 overflow-y-auto">{children}</div>
+            </ContentCheckerProvider>
         </SidebarInset>
         </SidebarProvider>
     </LoadingProvider>

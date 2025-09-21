@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Upload, CheckCircle, XCircle, AlertCircle, BarChart, FileText, Link as LinkIcon, Loader2, Flag } from 'lucide-react';
+import { Upload, CheckCircle, XCircle, AlertCircle, BarChart, FileText, Link as LinkIcon, Loader2, Flag, Info, BookCheck } from 'lucide-react';
 import { analyzeContent, AnalyzeContentOutput } from '@/ai/flows/analyze-content-flow';
 import { useToast } from '@/hooks/use-toast';
 
@@ -192,48 +192,64 @@ export default function DashboardPage() {
           )}
 
           {analysisResult && (
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle>Analysis Result</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center space-x-4 p-4 rounded-lg bg-muted">
-                  {getVerdictIcon(analysisResult.verdict)}
-                  <div>
-                    <h3 className="text-xl font-bold">{analysisResult.verdict}</h3>
-                    {analysisResult.confidence && <p className="text-muted-foreground">Confidence: {analysisResult.confidence}%</p>}
+            <>
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle>Verdict</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-4 p-4 rounded-lg bg-muted">
+                    {getVerdictIcon(analysisResult.verdict)}
+                    <div>
+                      <h3 className="text-xl font-bold">{analysisResult.verdict}</h3>
+                      {analysisResult.confidence && <p className="text-muted-foreground">Confidence: {analysisResult.confidence}%</p>}
+                    </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                <div>
-                  <h4 className="font-semibold text-lg mb-2">Explanation</h4>
+              <Card className="shadow-sm">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Explanation
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <p className="text-muted-foreground">{analysisResult.explanation}</p>
-                </div>
+                </CardContent>
+              </Card>
 
-                {analysisResult.evidence && analysisResult.evidence.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Evidence</h4>
-                    <ul className="space-y-3">
-                      {analysisResult.evidence.map((item, index) => (
-                        <li key={index} className="flex items-start space-x-3">
-                          <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
-                          <div>
-                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline-offset-4 hover:underline">
-                              {item.title}
-                            </a>
-                            <p className="text-sm text-muted-foreground">{item.source}</p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                <Button variant="outline" className="w-full border-destructive text-destructive hover:bg-destructive/5 hover:text-destructive">
-                  <Flag className="mr-2 h-4 w-4" /> Report as Misinformation
-                </Button>
-              </CardContent>
-            </Card>
+             {analysisResult.evidence && analysisResult.evidence.length > 0 && (
+                <Card className="shadow-sm">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <BookCheck className="h-5 w-5" />
+                            Evidence
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ul className="space-y-3">
+                        {analysisResult.evidence.map((item, index) => (
+                            <li key={index} className="flex items-start space-x-3">
+                            <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
+                            <div>
+                                <a href={item.url} target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline-offset-4 hover:underline">
+                                {item.title}
+                                </a>
+                                <p className="text-sm text-muted-foreground">{item.source}</p>
+                            </div>
+                            </li>
+                        ))}
+                        </ul>
+                    </CardContent>
+                </Card>
+             )}
+             
+            <Button variant="outline" className="w-full border-destructive text-destructive hover:bg-destructive/5 hover:text-destructive">
+                <Flag className="mr-2 h-4 w-4" /> Report as Misinformation
+            </Button>
+            </>
           )}
         </div>
 

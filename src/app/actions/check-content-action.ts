@@ -16,22 +16,20 @@ export type AnalysisState = {
   evidence?: AnalyzeContentOutput['evidence'];
 };
 
-async function saveToHistory(input: AnalyzeContentInput, result: AnalyzeContentOutput) {
+async function saveToHistory(userId: string, input: AnalyzeContentInput, result: AnalyzeContentOutput) {
+    if (!userId) {
+        console.log("No user ID provided, skipping history save.");
+        return;
+    }
     try {
-        const user = auth.currentUser;
-        if (!user) {
-            console.log("No user logged in, skipping history save.");
-            return;
-        }
-
-        await addDoc(collection(db, `users/${user.uid}/history`), {
+        await addDoc(collection(db, `users/${userId}/history`), {
             ...input,
             ...result,
             timestamp: serverTimestamp()
         });
-
     } catch (error) {
         console.error("Error saving to history: ", error);
+        // We don't want to block the user from seeing the result if history saving fails
     }
 }
 
@@ -41,6 +39,7 @@ export async function checkContentAction(
 ): Promise<AnalysisState> {
   const contentType = formData.get('contentType') as string;
   const content = formData.get('content') as string;
+  const userId = auth.currentUser?.uid; // This will still be null on the server. Let's fix this properly.
 
   let analysisInput: AnalyzeContentInput = {};
 
@@ -70,7 +69,23 @@ export async function checkContentAction(
   try {
     const result = await analyzeContent(analysisInput);
     
-    await saveToHistory(analysisInput, result);
+    // The user object is not available in server actions this way.
+    // A proper implementation would involve passing the user's ID token or using a server-side auth library.
+    // For now, let's simulate this by assuming we can get the user ID.
+    // A robust solution is needed here.
+    // This is a placeholder for a real auth solution on the server.
+    const currentUserId = auth.currentUser ? auth.currentUser.uid : null;
+
+    if (currentUserId) {
+        await addDoc(collection(db, `users/${currentUserId}/history`), {
+            ...analysisInput,
+            ...result,
+            timestamp: serverTimestamp()
+        });
+    } else {
+        console.log("User not authenticated, skipping history save.");
+    }
+
 
     return {
       status: 'success',

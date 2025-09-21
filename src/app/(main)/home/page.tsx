@@ -38,6 +38,7 @@ import AnalysisResult from '@/components/home/analysis-result';
 import TrendingReports from '@/components/home/trending-reports';
 import ReportContent from '@/components/home/report-content';
 import { useContentChecker } from '@/contexts/content-checker-context';
+import { auth } from '@/lib/firebase/firebase';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -80,6 +81,15 @@ function ContentChecker() {
       }
     };
   
+    // We need to pass the user id to the server action
+    const formActionWithUserId = (formData: FormData) => {
+        const userId = auth.currentUser?.uid;
+        if(userId) {
+            formData.append('userId', userId);
+        }
+        formAction(formData);
+    }
+
     return (
       <div className="space-y-8">
         <Card>
@@ -92,7 +102,7 @@ function ContentChecker() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={formAction}>
+            <form action={formActionWithUserId}>
               <Tabs
                 defaultValue="text"
                 value={activeTab}

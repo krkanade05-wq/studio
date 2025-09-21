@@ -23,7 +23,7 @@ const TrendingReportSchema = z.object({
   content: z.string().describe('The reported content (text or URL).'),
   count: z.number().describe('The number of times this content was reported.'),
   description: z.string().optional().describe('The most recent description provided for the report.'),
-  lastReportedAt: z.any().describe('The timestamp of the most recent report.'),
+  lastReportedAt: z.string().describe('The ISO timestamp of the most recent report.'),
 });
 
 export type TrendingReport = z.infer<typeof TrendingReportSchema>;
@@ -83,12 +83,12 @@ const getTrendingReportsFlow = ai.defineFlow(
     });
 
     // 4. Convert to an array, sort by count, and take the top 5
-    const sortedReports: TrendingReport[] = Object.entries(reportAggregates)
+    const sortedReports = Object.entries(reportAggregates)
       .map(([content, aggregate]) => ({
         content,
         count: aggregate.count,
         description: aggregate.lastDescription,
-        lastReportedAt: aggregate.lastReportedAt,
+        lastReportedAt: aggregate.lastReportedAt.toDate().toISOString(), // Convert Timestamp to ISO string
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);

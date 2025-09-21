@@ -334,9 +334,9 @@ function TrendingReports() {
     return () => clearInterval(interval);
   }, []);
 
-  const formatTimestamp = (timestamp: any) => {
-    if (timestamp && typeof timestamp.toDate === 'function') {
-      return formatDistanceToNow(timestamp.toDate(), { addSuffix: true });
+  const formatTimestamp = (timestamp: string) => {
+    if (timestamp) {
+      return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
     }
     return 'N/A';
   };

@@ -234,7 +234,6 @@ function MainLayout({
                 <SidebarHeader>
                     <div className="flex items-center gap-2">
                     <ShieldCheck className="h-6 w-6 text-primary" />
-                    <h1 className="text-xl font-semibold">Content Checker</h1>
                     </div>
                 </SidebarHeader>
 
@@ -298,14 +297,16 @@ function MainLayout({
                 </SidebarContent>
             </Sidebar>
             <SidebarInset>
-                <header className="flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
+                <header className="flex h-14 items-center justify-between border-b bg-background px-4">
                 <Link href="/home" className="flex items-center gap-2 font-semibold">
                     <ShieldCheck className="h-6 w-6 text-primary" />
                     <span className="">Content Checker</span>
                 </Link>
-                <SidebarTrigger>
-                    <PanelLeft />
-                </SidebarTrigger>
+                <div className="md:hidden">
+                    <SidebarTrigger>
+                        <PanelLeft />
+                    </SidebarTrigger>
+                </div>
                 </header>
                 <ContentCheckerProvider>
                     <div className="flex-1 overflow-y-auto">{children}</div>
@@ -326,8 +327,7 @@ function WrappedMainLayout(props: { children: React.ReactNode }) {
     );
 }
 
-// The final export must be a default export.
-// We are re-exporting our wrapped layout.
 export default WrappedMainLayout;
+
 
 

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -42,6 +43,7 @@ const FormSchema = z.object({
 
 export function SignUpForm() {
   const { toast } = useToast();
+  const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -57,7 +59,7 @@ export function SignUpForm() {
       title: 'Account Created',
       description: "You've successfully created an account.",
     });
-    form.reset();
+    router.push('/dashboard');
   }
 
   return (

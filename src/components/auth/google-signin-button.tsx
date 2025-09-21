@@ -1,6 +1,10 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { app } from '@/lib/firebase/firebase';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const GoogleIcon = () => (
   <svg
@@ -22,14 +26,42 @@ export function GoogleSignInButton({
 }: {
   offerGoogleSignIn: boolean;
 }) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithPopup(auth, provider);
+      toast({
+        title: 'Sign In Successful',
+        description: 'Welcome!',
+      });
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Google Sign-In Error', error);
+      toast({
+        title: 'Sign In Failed',
+        description: 'Could not sign in with Google. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (!offerGoogleSignIn) {
     return null;
   }
 
   return (
-    <Button type="button" variant="outline" className="w-full">
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full"
+      onClick={handleSignIn}
+    >
       <GoogleIcon />
-      <span className='ml-2'>Continue with Google</span>
+      <span className="ml-2">Continue with Google</span>
     </Button>
   );
 }

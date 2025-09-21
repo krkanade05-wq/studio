@@ -139,15 +139,14 @@ export default function ProfilePage() {
       await updateProfile(user, { photoURL });
       
       // Force refresh user to get new photoURL
-      await user.reload();
-      // create a new user object to trigger re-render
-      setUser(auth.currentUser ? { ...auth.currentUser } : null);
+      await auth.currentUser?.reload();
+      setUser(auth.currentUser); // This will trigger re-render
 
       toast({
           title: 'Success',
           description: 'Profile picture updated successfully.'
       });
-      setImageFile(null);
+      setImageFile(null); // Clear the selected file
     } catch (error: any) {
         toast({
             title: 'Upload Failed',
@@ -238,7 +237,7 @@ export default function ProfilePage() {
             <CardContent>
                 <div className="flex flex-col items-center gap-6 text-center">
                     <Avatar className="h-28 w-28">
-                        <AvatarImage src={imagePreview ?? undefined} />
+                        <AvatarImage src={imagePreview ?? user?.photoURL ?? undefined} />
                         <AvatarFallback>
                             <span className="text-3xl">{user?.displayName?.[0] ?? 'U'}</span>
                         </AvatarFallback>
@@ -379,4 +378,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
 

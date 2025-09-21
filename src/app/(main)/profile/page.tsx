@@ -56,6 +56,7 @@ export default function ProfilePage() {
   const [totalChecks, setTotalChecks] = useState(0);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -110,6 +111,15 @@ export default function ProfilePage() {
     }
     setIsEditing(!isEditing);
   };
+  
+  const handlePasswordEditToggle = () => {
+    if (isEditingPassword) {
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+    setIsEditingPassword(!isEditingPassword);
+  }
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,6 +137,9 @@ export default function ProfilePage() {
       await setDoc(userDocRef, { mobile, address }, { merge: true });
 
       await fetchUserProfile(user.uid);
+      
+      // Manually update user displayName in local state to re-render layout
+      setUser({...user, displayName: name});
 
       toast({
         title: 'Success',
@@ -167,9 +180,7 @@ export default function ProfilePage() {
         title: 'Success',
         description: 'Your password has been changed.',
       });
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      handlePasswordEditToggle();
     } catch (error: any) {
       toast({
         title: 'Error changing password',
@@ -304,29 +315,47 @@ export default function ProfilePage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Change Password</CardTitle>
-            <CardDescription>Update your password for better security.</CardDescription>
-          </CardHeader>
+            <CardHeader className="flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Change Password</CardTitle>
+                  {!isEditingPassword && <CardDescription>Update your password for better security.</CardDescription>}
+                </div>
+                 {!isEditingPassword && (
+                    <Button type="button" onClick={handlePasswordEditToggle}>
+                        Change Password
+                    </Button>
+                )}
+            </CardHeader>
           <CardContent>
-            <form onSubmit={handleChangePassword} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="current-password">Current Password</Label>
-                <Input id="current-password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input id="new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm New Password</Label>
-                <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-              </div>
-              <Button type="submit" disabled={isUpdating}>
-                 {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Change Password
-              </Button>
-            </form>
+             {isEditingPassword ? (
+                 <form onSubmit={handleChangePassword} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="current-password">Current Password</Label>
+                        <Input id="current-password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="new-password">New Password</Label>
+                        <Input id="new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="confirm-password">Confirm New Password</Label>
+                        <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                    </div>
+                    <div className="flex gap-2">
+                        <Button type="submit" disabled={isUpdating}>
+                            {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Save Password
+                        </Button>
+                         <Button type="button" variant="outline" onClick={handlePasswordEditToggle}>
+                            Cancel
+                        </Button>
+                    </div>
+                </form>
+             ) : (
+                <div className="text-sm text-muted-foreground">
+                    Your password can be changed here.
+                </div>
+             )}
           </CardContent>
         </Card>
 
@@ -352,10 +381,10 @@ export default function ProfilePage() {
                 </AlertDialogHeader>
                  <div className="space-y-2">
                     <Label htmlFor="delete-confirm-password">Current Password</Label>
-                    <Input id="delete-confirm-password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.targe.value)} required />
+                    <Input id="delete-confirm-password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setIsDeleting(false)}>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel onClick={() => { setIsDeleting(false); setCurrentPassword('')}}>Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleDeleteAccount} disabled={isDeleting || !currentPassword}>
                      {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Confirm Deletion

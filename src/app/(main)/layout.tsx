@@ -22,6 +22,7 @@ import {
   Loader2,
   LogOut,
   History,
+  Gamepad2,
 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -288,9 +289,9 @@ function MainLayout({
                         </NavButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                        <NavButton href="/learn" tooltip={{ children: 'Learn' }}>
-                            <LifeBuoy />
-                            Learn
+                        <NavButton href="/game" tooltip={{ children: 'Game' }}>
+                            <Gamepad2 />
+                            Game
                         </NavButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>

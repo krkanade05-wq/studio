@@ -47,6 +47,7 @@ import { app } from '@/lib/firebase/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { ContentCheckerProvider } from '@/contexts/content-checker-context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 
 type LoadingContextType = {
@@ -288,6 +289,7 @@ function MainLayout({
                         </Button>
                     </SidebarMenuItem>
                     </SidebarMenu>
+                    <Separator className="my-1" />
                      <div className="p-2 text-xs text-center text-sidebar-foreground/50">
                         &copy; 2025
                     </div>
@@ -325,10 +327,3 @@ function WrappedMainLayout(props: { children: React.ReactNode }) {
 }
 
 export default WrappedMainLayout;
-
-
-
-
-
-
-

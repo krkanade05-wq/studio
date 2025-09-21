@@ -46,6 +46,7 @@ import { getAuth, signOut } from 'firebase/auth';
 import { app } from '@/lib/firebase/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
 type LoadingContextType = {
   isLoading: boolean;
@@ -224,6 +225,7 @@ export default function DashboardLayout({
                     </Button>
                   </SidebarMenuItem>
                 </SidebarMenu>
+                <Separator className="my-1" />
                  <div className="p-2 text-xs text-center text-sidebar-foreground/50">
                     &copy; 2025
                 </div>

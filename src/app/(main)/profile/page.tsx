@@ -36,10 +36,11 @@ type UserProfile = {
   address?: string;
 };
 
-type ErrorDialogState = {
+type DialogState = {
     isOpen: boolean;
     title: string;
     description: string;
+    isError?: boolean;
 };
 
 export default function ProfilePage() {
@@ -67,7 +68,7 @@ export default function ProfilePage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const [errorDialog, setErrorDialog] = useState<ErrorDialogState>({ isOpen: false, title: '', description: '' });
+  const [dialog, setDialog] = useState<DialogState>({ isOpen: false, title: '', description: '' });
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -175,10 +176,11 @@ export default function ProfilePage() {
     if (!user || !user.email) return;
 
     if (newPassword !== confirmPassword) {
-      setErrorDialog({
+      setDialog({
         isOpen: true,
         title: 'Password Mismatch',
-        description: 'The new and confirmed passwords do not match. Please try again.'
+        description: 'The new and confirmed passwords do not match. Please try again.',
+        isError: true,
       });
       return;
     }
@@ -188,19 +190,23 @@ export default function ProfilePage() {
       const credential = EmailAuthProvider.credential(user.email, currentPassword);
       await reauthenticateWithCredential(user, credential);
       await updatePassword(user, newPassword);
-      toast({
+
+      setDialog({
+        isOpen: true,
         title: 'Success',
-        description: 'Your password has been changed.',
+        description: 'Your password has been changed successfully.',
+        isError: false,
       });
-      handlePasswordEditToggle();
+
     } catch (error: any) {
       let description = 'An unexpected error occurred. Please try again.';
       if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         description = 'The current password you entered is incorrect.';
-         setErrorDialog({
+         setDialog({
             isOpen: true,
             title: 'Incorrect Password',
             description: description,
+            isError: true,
         });
       } else {
          toast({
@@ -240,6 +246,13 @@ export default function ProfilePage() {
       setIsDeleting(false);
     } 
   };
+  
+  const closeDialog = () => {
+    if (!dialog.isError) {
+        handlePasswordEditToggle();
+    }
+    setDialog({ isOpen: false, title: '', description: '' });
+  }
 
   if (loading) {
     return (
@@ -422,16 +435,16 @@ export default function ProfilePage() {
         </Card>
       </main>
 
-        <AlertDialog open={errorDialog.isOpen} onOpenChange={(isOpen) => !isOpen && setErrorDialog({ isOpen: false, title: '', description: ''})}>
+        <AlertDialog open={dialog.isOpen} onOpenChange={(isOpen) => !isOpen && closeDialog()}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>{errorDialog.title}</AlertDialogTitle>
+                    <AlertDialogTitle>{dialog.title}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        {errorDialog.description}
+                        {dialog.description}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogAction onClick={() => setErrorDialog({ isOpen: false, title: '', description: ''})}>
+                    <AlertDialogAction onClick={closeDialog}>
                         OK
                     </AlertDialogAction>
                 </AlertDialogFooter>

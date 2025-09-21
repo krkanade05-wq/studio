@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, User } from 'firebase/auth';
 import { app, db } from '@/lib/firebase/firebase';
-import { doc, getDoc, setDoc, collection, getCountFromServer } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, getCountFromServer, deleteDoc, getDocs, writeBatch } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -149,9 +149,7 @@ export default function ProfilePage() {
 
       // This ensures the local user object and related state is refreshed
       await auth.currentUser?.reload();
-      if (auth.currentUser) {
-        setUser({ ...auth.currentUser });
-      }
+      setUser(auth.currentUser);
       await fetchUserProfile(user.uid);
       
       setDialog({
@@ -226,13 +224,33 @@ export default function ProfilePage() {
 
     setIsDeleting(true);
     try {
+      // Re-authenticate user
       const credential = EmailAuthProvider.credential(user.email, currentPassword);
       await reauthenticateWithCredential(user, credential);
+
+      // Delete Firestore data
+      const userDocRef = doc(db, 'users', user.uid);
+      
+      // Delete history sub-collection
+      const historyCollectionRef = collection(userDocRef, 'history');
+      const historySnapshot = await getDocs(historyCollectionRef);
+      const batch = writeBatch(db);
+      historySnapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+
+      // Delete the main user document
+      await deleteDoc(userDocRef);
+
+      // Delete user from Auth
       await deleteUser(user);
+
       toast({
         title: 'Account Deleted',
-        description: 'Your account has been permanently deleted.',
+        description: 'Your account and all associated data have been permanently deleted.',
       });
+      
       router.push('/sign-up');
     } catch (error: any) {
       let description = 'An unexpected error occurred. Please try again.';
@@ -455,4 +473,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-

@@ -16,11 +16,31 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, AlertCircle, History as HistoryIcon } from 'lucide-react';
+import {
+  Loader2,
+  AlertCircle,
+  History as HistoryIcon,
+  Calendar as CalendarIcon,
+} from 'lucide-react';
 import { onAuthStateChanged, User } from 'firebase/auth';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import type { DateRange } from 'react-day-picker';
 
 type HistoryItem = {
   id: string;
@@ -45,10 +65,15 @@ const getVerdictBadgeVariant = (
 };
 
 export default function HistoryPage() {
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [allHistory, setAllHistory] = useState<HistoryItem[]>([]);
+  const [filteredHistory, setFilteredHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
+
+  const [filterType, setFilterType] = useState('all');
+  const [lastN, setLastN] = useState('5');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -75,7 +100,7 @@ export default function HistoryPage() {
         querySnapshot.forEach((doc) => {
           items.push({ id: doc.id, ...doc.data() } as HistoryItem);
         });
-        setHistory(items);
+        setAllHistory(items);
         setLoading(false);
       },
       (err) => {
@@ -88,12 +113,41 @@ export default function HistoryPage() {
     return () => unsubscribe();
   }, [user]);
 
+  useEffect(() => {
+    let newFilteredHistory = [...allHistory];
+    if (filterType === 'lastN') {
+      newFilteredHistory = allHistory.slice(0, parseInt(lastN, 10));
+    } else if (filterType === 'dateRange' && dateRange?.from && dateRange?.to) {
+      newFilteredHistory = allHistory.filter((item) => {
+        const itemDate = item.timestamp.toDate();
+        return itemDate >= dateRange.from! && itemDate <= dateRange.to!;
+      });
+    }
+    setFilteredHistory(newFilteredHistory);
+  }, [allHistory, filterType, lastN, dateRange]);
+
   const renderQuery = (item: HistoryItem) => {
     if (item.text) {
-      return <p className="text-sm text-muted-foreground truncate">Text: {item.text}</p>;
+      return (
+        <p className="truncate text-sm text-muted-foreground">
+          Text: {item.text}
+        </p>
+      );
     }
     if (item.url) {
-      return <p className="text-sm text-muted-foreground truncate">URL: <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{item.url}</a></p>;
+      return (
+        <p className="truncate text-sm text-muted-foreground">
+          URL:{' '}
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            {item.url}
+          </a>
+        </p>
+      );
     }
     return <p className="text-sm text-muted-foreground">Image Analysis</p>;
   };
@@ -101,19 +155,79 @@ export default function HistoryPage() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-transparent p-4 md:p-8">
       <main className="mx-auto w-full max-w-4xl">
-        <div className="flex items-center gap-4 mb-8">
-          <HistoryIcon className="h-8 w-8" />
-          <h1 className="text-3xl font-bold">Check History</h1>
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <HistoryIcon className="h-8 w-8" />
+            <h1 className="text-3xl font-bold">Check History</h1>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All History</SelectItem>
+                <SelectItem value="lastN">Last N Checks</SelectItem>
+                <SelectItem value="dateRange">Date Range</SelectItem>
+              </SelectContent>
+            </Select>
+            {filterType === 'lastN' && (
+              <Select value={lastN} onValueChange={setLastN}>
+                <SelectTrigger className="w-full sm:w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">Last 5</SelectItem>
+                  <SelectItem value="10">Last 10</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+            {filterType === 'dateRange' && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="date"
+                    variant={'outline'}
+                    className="w-full justify-start text-left font-normal sm:w-auto"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateRange?.from ? (
+                      dateRange.to ? (
+                        <>
+                          {format(dateRange.from, 'LLL dd, y')} -{' '}
+                          {format(dateRange.to, 'LLL dd, y')}
+                        </>
+                      ) : (
+                        format(dateRange.from, 'LLL dd, y')
+                      )
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
         </div>
 
         {loading && (
-          <div className="flex justify-center items-center h-64">
+          <div className="flex h-64 items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
 
         {!loading && error && (
-          <Card className="bg-destructive/10 border-destructive">
+          <Card className="border-destructive bg-destructive/10">
             <CardHeader className="flex-row items-center gap-4">
               <AlertCircle className="h-6 w-6 text-destructive" />
               <CardTitle className="text-destructive">Error</CardTitle>
@@ -124,25 +238,27 @@ export default function HistoryPage() {
           </Card>
         )}
 
-        {!loading && !error && history.length === 0 && (
+        {!loading && !error && filteredHistory.length === 0 && (
           <Card>
             <CardHeader>
               <CardTitle>No History Found</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                You haven&apos;t checked any content yet. Your history will appear here.
+                {filterType === 'all'
+                  ? "You haven't checked any content yet. Your history will appear here."
+                  : 'No history entries match your filter criteria.'}
               </p>
             </CardContent>
           </Card>
         )}
 
-        {!loading && !error && history.length > 0 && (
+        {!loading && !error && filteredHistory.length > 0 && (
           <div className="space-y-4">
-            {history.map((item) => (
+            {filteredHistory.map((item) => (
               <Card key={item.id}>
                 <CardHeader>
-                  <div className="flex justify-between items-start">
+                  <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="mb-1">{renderQuery(item)}</CardTitle>
                       <CardDescription>
@@ -155,7 +271,9 @@ export default function HistoryPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">{item.explanation}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {item.explanation}
+                  </p>
                 </CardContent>
               </Card>
             ))}

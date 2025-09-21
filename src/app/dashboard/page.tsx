@@ -112,7 +112,9 @@ export default function DashboardPage() {
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
-            setLoading(!currentUser);
+            if (!currentUser) {
+              setLoading(false);
+            }
         });
         return () => unsubscribeAuth();
     }, []);
@@ -141,6 +143,9 @@ export default function DashboardPage() {
             setLikelyFalse(falseCount);
             setUnverifiable(unverifiableCount);
             setLoading(false);
+        }, (error) => {
+          console.error("Error fetching history: ", error);
+          setLoading(false);
         });
 
         return () => unsubscribe();
@@ -148,7 +153,7 @@ export default function DashboardPage() {
 
     if (loading) {
         return (
-            <div className="flex min-h-screen w-full flex-col items-center justify-center bg-transparent p-4 md:p-8">
+            <div className="flex min-h-[calc(100vh-theme(spacing.16))] w-full flex-col items-center justify-center bg-transparent p-4 md:p-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         );
@@ -293,5 +298,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    

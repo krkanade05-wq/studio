@@ -12,7 +12,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const AnalyzeContentInputSchema = z.object({
+const AnalyzeContentInputSchema = z.object({
   text: z.string().optional().describe('The text content to analyze.'),
   url: z.string().optional().describe('The URL of the content to analyze.'),
   photoDataUri: z.string().optional().describe("A photo of the content, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
@@ -26,7 +26,7 @@ const EvidenceSchema = z.object({
     url: z.string().describe('The URL to the evidence source.')
 });
 
-export const AnalyzeContentOutputSchema = z.object({
+const AnalyzeContentOutputSchema = z.object({
   verdict: z.enum(['Likely True', 'Likely False', 'Unverifiable']).describe('The overall verdict on the content\'s veracity.'),
   confidence: z.number().min(0).max(100).optional().describe('The confidence level of the verdict, from 0 to 100.'),
   explanation: z.string().describe('A summary explaining why the content may be misleading and the reasoning behind the verdict.'),

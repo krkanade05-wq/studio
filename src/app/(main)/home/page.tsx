@@ -45,6 +45,7 @@ import {
 import { useState, useEffect, useActionState, useRef } from 'react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
+import { usePathname } from 'next/navigation';
 
 import AnalysisResult from '@/components/home/analysis-result';
 import GenerateReply from '@/components/home/generate-reply';
@@ -85,6 +86,8 @@ function ContentChecker() {
     const [activeTab, setActiveTab] = useState('text');
     const [user, setUser] = useState<User | null>(null);
 
+    const pathname = usePathname();
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
@@ -92,9 +95,20 @@ function ContentChecker() {
         return () => unsubscribe();
     }, []);
 
+    useEffect(() => {
+        // Reset analysis when navigating away
+        return () => {
+            if (pathname !== '/home') {
+                resetAnalysis();
+            }
+        };
+    }, [pathname, resetAnalysis]);
+
     const handleTabChange = (value: string) => {
       setActiveTab(value);
       resetAnalysis();
+      setImagePreview(null);
+      setImageError(null);
     };
   
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -327,6 +341,7 @@ function TrendingReports() {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
+        setLoading(true);
         const reports = await getTrendingReports();
         setTrending(reports);
       } catch (err) {
@@ -386,10 +401,10 @@ function TrendingReports() {
               <AccordionItem value={`item-${index}`} key={index}>
                 <AccordionTrigger>
                   <div className="flex w-full items-center justify-between pr-4 text-left">
-                    <span className="flex-1 text-sm font-medium text-left">
+                    <p className="flex-1 text-sm font-medium text-left break-all">
                       {report.content}
-                    </span>
-                    <Badge variant="secondary">{report.count} reports</Badge>
+                    </p>
+                    <Badge variant="secondary" className="ml-2 flex-shrink-0">{report.count} reports</Badge>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-4 pt-2">

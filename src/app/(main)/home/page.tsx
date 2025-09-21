@@ -86,8 +86,6 @@ function ContentChecker() {
     const [activeTab, setActiveTab] = useState('text');
     const [user, setUser] = useState<User | null>(null);
 
-    const pathname = usePathname();
-
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
@@ -96,19 +94,12 @@ function ContentChecker() {
     }, []);
 
     useEffect(() => {
-        // This effect runs when the component mounts and when pathname changes.
-        // We use a ref to track if it's the initial mount on the home page.
-        const isInitialMount = pathname === '/home';
-        
-        // The cleanup function will be called when the component unmounts
-        // (i.e., when we navigate away from the page).
+        // The cleanup function of this effect will run when the component unmounts,
+        // which happens when the user navigates to a different page.
         return () => {
-          // If we are navigating away from the home page, reset the analysis.
-          if (!isInitialMount) {
-            resetAnalysis();
-          }
+          resetAnalysis();
         };
-      }, [pathname, resetAnalysis]);
+      }, [resetAnalysis]);
 
     const handleTabChange = (value: string) => {
       setActiveTab(value);

@@ -304,9 +304,9 @@ function MainLayout({
                 <div className='mt-auto'>
                     <SidebarMenu>
                     <SidebarMenuItem>
-                        <NavButton href="/help" tooltip={{ children: 'Help' }}>
+                        <NavButton href="/help-and-support" tooltip={{ children: 'Help & Support' }}>
                             <LifeBuoy />
-                            Help
+                            Help & Support
                         </NavButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>

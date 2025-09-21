@@ -25,7 +25,7 @@ type Message = {
   sender: 'user' | 'bot';
 };
 
-export default function HelpPage() {
+export default function HelpAndSupportPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
         id: 'initial',

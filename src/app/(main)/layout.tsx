@@ -311,7 +311,7 @@ function MainLayout({
                     </SidebarMenu>
                     <Separator className="my-1" />
                      <div className="p-2 text-xs text-center text-sidebar-foreground/50">
-                        &copy; 2025
+                        &copy; 2025 MythBuster AI
                     </div>
                 </div>
                 </SidebarContent>

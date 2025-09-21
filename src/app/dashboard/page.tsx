@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -65,14 +66,15 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-background p-4 md:p-8">
-      <header className="w-full max-w-5xl flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Content Checker</h1>
-        <Button onClick={handleSignOut} variant="outline">
-          Sign Out
-        </Button>
+    <div className="flex min-h-screen w-full flex-col items-center bg-transparent p-4 md:p-8">
+       <header className="w-full max-w-5xl flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold hidden md:block">Content Checker</h1>
+        <div className="w-full md:w-auto flex justify-end">
+          <Button onClick={handleSignOut} variant="outline">
+            Sign Out
+          </Button>
+        </div>
       </header>
-
       <main className="w-full max-w-5xl grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
           <Card>

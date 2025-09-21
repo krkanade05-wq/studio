@@ -2,10 +2,9 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, User } from 'firebase/auth';
-import { app, db, storage } from '@/lib/firebase/firebase';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { app, db } from '@/lib/firebase/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,7 +13,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,10 +29,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useRouter } from 'next/navigation';
-import { Loader2, UploadCloud } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
-import imageCompression from 'browser-image-compression';
 
 export default function ProfilePage() {
   const auth = getAuth(app);
@@ -48,15 +44,10 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [totalChecks, setTotalChecks] = useState(0);
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -65,7 +56,6 @@ export default function ProfilePage() {
         setUser(currentUser);
         setName(currentUser.displayName || '');
         setEmail(currentUser.email || '');
-        setImagePreview(currentUser.photoURL || null);
         fetchHistoryCount(currentUser.uid);
       } else {
         router.push('/sign-in');
@@ -104,57 +94,6 @@ export default function ProfilePage() {
       });
     } finally {
       setIsUpdating(false);
-    }
-  };
-
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-  
-  const handleImageUpload = async () => {
-    if (!imageFile || !user) return;
-
-    setIsUploading(true);
-
-    const options = {
-      maxSizeMB: 0.5, // (max file size in MB)
-      maxWidthOrHeight: 400, // (max width or height in pixels)
-      useWebWorker: true,
-    };
-
-    try {
-      const compressedFile = await imageCompression(imageFile, options);
-      const storageRef = ref(storage, `profile_pictures/${user.uid}`);
-      
-      await uploadBytes(storageRef, compressedFile);
-      const photoURL = await getDownloadURL(storageRef);
-      await updateProfile(user, { photoURL });
-      
-      // Force refresh user to get new photoURL
-      await auth.currentUser?.reload();
-      setUser(auth.currentUser); // This will trigger re-render
-
-      toast({
-          title: 'Success',
-          description: 'Profile picture updated successfully.'
-      });
-      setImageFile(null); // Clear the selected file
-    } catch (error: any) {
-        toast({
-            title: 'Upload Failed',
-            description: error.message,
-            variant: 'destructive',
-        });
-    } finally {
-        setIsUploading(false);
     }
   };
 
@@ -228,42 +167,6 @@ export default function ProfilePage() {
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-transparent p-4 md:p-8">
       <main className="w-full max-w-2xl space-y-8">
-
-        <Card>
-            <CardHeader>
-                <CardTitle>Profile Picture</CardTitle>
-                <CardDescription>Update your avatar.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="flex flex-col items-center gap-6 text-center">
-                    <Avatar className="h-28 w-28">
-                        <AvatarImage src={imagePreview ?? user?.photoURL ?? undefined} />
-                        <AvatarFallback>
-                            <span className="text-3xl">{user?.displayName?.[0] ?? 'U'}</span>
-                        </AvatarFallback>
-                    </Avatar>
-                     <input 
-                        type="file" 
-                        ref={fileInputRef}
-                        className="hidden" 
-                        onChange={handleImageSelect}
-                        accept="image/png, image/jpeg"
-                    />
-                    <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
-                        <UploadCloud className="mr-2 h-4 w-4" />
-                        Select Image
-                    </Button>
-                </div>
-            </CardContent>
-            {imageFile && (
-                 <CardFooter>
-                    <Button className="w-full" onClick={handleImageUpload} disabled={isUploading}>
-                        {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Upload and Save
-                    </Button>
-                </CardFooter>
-            )}
-        </Card>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              <Card>
@@ -378,5 +281,6 @@ export default function ProfilePage() {
     </div>
   );
 }
+
 
 

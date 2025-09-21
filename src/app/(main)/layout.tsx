@@ -81,10 +81,22 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             if (user) {
                 setUser(user);
                 if (!hasShownWelcomeToast.current) {
-                     toast({
-                        title: 'Sign In Successful',
-                        description: `Welcome back, ${user.displayName || 'User'}!`,
-                    });
+                    const creationTime = new Date(user.metadata.creationTime || 0).getTime();
+                    const lastSignInTime = new Date(user.metadata.lastSignInTime || 0).getTime();
+
+                    const isNewUser = Math.abs(creationTime - lastSignInTime) < 2000; // Check if times are within 2s
+
+                    if (isNewUser) {
+                        toast({
+                            title: 'Account Created!',
+                            description: `Welcome, ${user.displayName || 'User'}!`,
+                        });
+                    } else {
+                        toast({
+                            title: 'Sign In Successful',
+                            description: `Welcome back, ${user.displayName || 'User'}!`,
+                        });
+                    }
                     hasShownWelcomeToast.current = true;
                 }
             } else {

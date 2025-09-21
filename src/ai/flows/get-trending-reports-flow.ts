@@ -19,11 +19,17 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/firebase';
 
+
+const ReportDetailSchema = z.object({
+  description: z.string().optional().describe('The description provided for the report.'),
+  reportedAt: z.string().describe('The ISO timestamp of the report.'),
+});
+
 const TrendingReportSchema = z.object({
   content: z.string().describe('The reported content (text or URL).'),
   count: z.number().describe('The number of times this content was reported.'),
-  description: z.string().optional().describe('The most recent description provided for the report.'),
   lastReportedAt: z.string().describe('The ISO timestamp of the most recent report.'),
+  details: z.array(ReportDetailSchema).describe('A list of all individual reports for this content.')
 });
 
 export type TrendingReport = z.infer<typeof TrendingReportSchema>;
@@ -36,8 +42,8 @@ export async function getTrendingReports(): Promise<TrendingReport[]> {
 
 type AggregatedReport = {
   count: number;
-  lastDescription?: string;
   lastReportedAt: Timestamp;
+  details: { description?: string; timestamp: Timestamp }[];
 };
 
 const getTrendingReportsFlow = ai.defineFlow(
@@ -58,7 +64,7 @@ const getTrendingReportsFlow = ai.defineFlow(
     );
     const querySnapshot = await getDocs(q);
 
-    // 3. Aggregate the report counts, descriptions, and latest timestamp
+    // 3. Aggregate the report counts and details
     const reportAggregates: Record<string, AggregatedReport> = {};
     querySnapshot.forEach((doc) => {
       const data = doc.data();
@@ -68,16 +74,17 @@ const getTrendingReportsFlow = ai.defineFlow(
           reportAggregates[content] = {
             count: 0,
             lastReportedAt: data.timestamp,
-            lastDescription: data.description,
+            details: [],
           };
         }
         reportAggregates[content].count++;
-        // Keep the latest report's details
+        reportAggregates[content].details.push({
+            description: data.description,
+            timestamp: data.timestamp,
+        });
+
         if (data.timestamp > reportAggregates[content].lastReportedAt) {
           reportAggregates[content].lastReportedAt = data.timestamp;
-          if (data.description) {
-            reportAggregates[content].lastDescription = data.description;
-          }
         }
       }
     });
@@ -87,8 +94,13 @@ const getTrendingReportsFlow = ai.defineFlow(
       .map(([content, aggregate]) => ({
         content,
         count: aggregate.count,
-        description: aggregate.lastDescription,
-        lastReportedAt: aggregate.lastReportedAt.toDate().toISOString(), // Convert Timestamp to ISO string
+        lastReportedAt: aggregate.lastReportedAt.toDate().toISOString(),
+        details: aggregate.details
+            .sort((a,b) => b.timestamp.toMillis() - a.timestamp.toMillis()) // Sort details chronologically
+            .map(detail => ({
+                description: detail.description,
+                reportedAt: detail.timestamp.toDate().toISOString(),
+            })),
       }))
       .sort((a, b) => b.lastReportedAt.localeCompare(a.lastReportedAt))
       .slice(0, 5);

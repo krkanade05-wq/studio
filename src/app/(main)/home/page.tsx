@@ -40,6 +40,7 @@ import {
   Upload,
   BarChart,
   Clock,
+  MessageSquareQuote,
 } from 'lucide-react';
 import { useState, useEffect, useActionState, useRef } from 'react';
 import Image from 'next/image';
@@ -377,22 +378,27 @@ function TrendingReports() {
               <AccordionItem value={`item-${index}`} key={index}>
                 <AccordionTrigger>
                   <div className="flex w-full items-center justify-between pr-4">
-                    <span className="text-sm font-medium truncate">
-                      {index + 1}. {report.content}
+                    <span className="text-sm font-medium truncate w-3/4">
+                      {report.content}
                     </span>
                     <Badge variant="secondary">{report.count} reports</Badge>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-4 pt-2">
-                  {report.description && (
-                    <p className="text-sm text-muted-foreground italic">
-                      &quot;{report.description}&quot;
-                    </p>
-                  )}
                   <div className="flex items-center text-xs text-muted-foreground">
                     <Clock className="mr-1.5 h-3 w-3" />
                     Last reported: {formatTimestamp(report.lastReportedAt)}
                   </div>
+                   <div className="space-y-3">
+                    {report.details.map((detail, detailIndex) => (
+                       detail.description ? (
+                         <div key={detailIndex} className="text-sm text-muted-foreground border-l-2 pl-3">
+                           <p className="italic">&quot;{detail.description}&quot;</p>
+                           <p className="text-xs mt-1">{formatTimestamp(detail.reportedAt)}</p>
+                         </div>
+                       ) : null
+                    ))}
+                   </div>
                 </AccordionContent>
               </AccordionItem>
             ))}

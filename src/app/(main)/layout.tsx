@@ -31,6 +31,7 @@ import {
   useState,
   useTransition,
   useEffect,
+  useRef,
 } from 'react';
 import {
   AlertDialog,
@@ -70,13 +71,22 @@ const useAuth = () => {
 function AuthProvider({ children }: { children: React.ReactNode }) {
     const auth = getAuth(app);
     const router = useRouter();
+    const { toast } = useToast();
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [loading, setLoading] = useState(true);
+    const hasShownWelcomeToast = useRef(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setUser(user);
+                if (!hasShownWelcomeToast.current) {
+                     toast({
+                        title: 'Sign In Successful',
+                        description: `Welcome back, ${user.displayName || 'User'}!`,
+                    });
+                    hasShownWelcomeToast.current = true;
+                }
             } else {
                 router.push('/sign-in');
             }
@@ -84,7 +94,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         return () => unsubscribe();
-    }, [auth, router]);
+    }, [auth, router, toast]);
 
     if (loading) {
         return (
@@ -325,5 +335,3 @@ export default function RootAuthLayout({ children }: {children: React.ReactNode}
         </AuthProvider>
     );
 }
-
-    

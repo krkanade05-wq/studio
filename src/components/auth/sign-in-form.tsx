@@ -59,10 +59,6 @@ export function SignInForm() {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
-      toast({
-        title: 'Sign In Successful',
-        description: 'Welcome back!',
-      });
       router.push('/home');
     } catch (error: any) {
       console.error('Sign In Error', error);

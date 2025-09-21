@@ -66,10 +66,6 @@ export function SignUpForm() {
       await updateProfile(userCredential.user, {
         displayName: data.name
       });
-      toast({
-        title: 'Account Created',
-        description: "You've successfully created an account.",
-      });
       router.push('/home');
     } catch (error: any) {
       console.error("Sign Up Error", error);

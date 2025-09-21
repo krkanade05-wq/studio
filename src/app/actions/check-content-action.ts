@@ -5,6 +5,8 @@ import {
   AnalyzeContentOutput,
   AnalyzeContentInput,
 } from '@/ai/flows/analyze-content-flow';
+import { auth, db } from '@/lib/firebase/firebase';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 export type AnalysisState = {
   status: 'idle' | 'loading' | 'success' | 'error';
@@ -13,6 +15,25 @@ export type AnalysisState = {
   explanation?: string;
   evidence?: AnalyzeContentOutput['evidence'];
 };
+
+async function saveToHistory(input: AnalyzeContentInput, result: AnalyzeContentOutput) {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            console.log("No user logged in, skipping history save.");
+            return;
+        }
+
+        await addDoc(collection(db, `users/${user.uid}/history`), {
+            ...input,
+            ...result,
+            timestamp: serverTimestamp()
+        });
+
+    } catch (error) {
+        console.error("Error saving to history: ", error);
+    }
+}
 
 export async function checkContentAction(
   prevState: AnalysisState,
@@ -48,6 +69,9 @@ export async function checkContentAction(
 
   try {
     const result = await analyzeContent(analysisInput);
+    
+    await saveToHistory(analysisInput, result);
+
     return {
       status: 'success',
       verdict: result.verdict,

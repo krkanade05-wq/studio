@@ -23,6 +23,7 @@ import {
   Loader2,
   Home,
   LogOut,
+  History,
 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -134,7 +135,7 @@ const NavButton = ({ href, children, tooltip }: { href: string; children: React.
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    if (!isActive) {
+    if (pathname !== href) {
       showLoading(href);
     }
   };
@@ -199,6 +200,12 @@ export default function DashboardLayout({
                     <NavButton href="/dashboard" tooltip={{ children: 'Dashboard' }}>
                         <LayoutDashboard />
                         Dashboard
+                    </NavButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                    <NavButton href="/dashboard/history" tooltip={{ children: 'History' }}>
+                        <History />
+                        History
                     </NavButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

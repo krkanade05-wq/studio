@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Loader2,
   LogOut,
+  History,
 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -198,6 +199,12 @@ export default function MainLayout({
                       <NavButton href="/dashboard" tooltip={{ children: 'Dashboard' }}>
                           <LayoutDashboard />
                           Dashboard
+                      </NavButton>
+                  </SidebarMenuItem>
+                   <SidebarMenuItem>
+                      <NavButton href="/dashboard/history" tooltip={{ children: 'History' }}>
+                          <History />
+                          History
                       </NavButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>

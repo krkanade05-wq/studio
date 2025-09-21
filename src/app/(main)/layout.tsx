@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import {
-  FileText,
+  LayoutDashboard,
   Home,
   LifeBuoy,
   User,
@@ -195,9 +195,9 @@ export default function MainLayout({
                       </NavButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                      <NavButton href="/dashboard/report-content" tooltip={{ children: 'Report Content' }}>
-                          <FileText />
-                          Reports
+                      <NavButton href="/dashboard" tooltip={{ children: 'Dashboard' }}>
+                          <LayoutDashboard />
+                          Dashboard
                       </NavButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>

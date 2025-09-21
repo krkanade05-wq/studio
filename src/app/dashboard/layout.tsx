@@ -196,9 +196,9 @@ export default function DashboardLayout({
                     </NavButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                    <NavButton href="/dashboard/report-content" tooltip={{ children: 'Report Content' }}>
-                        <FileText />
-                        Reports
+                    <NavButton href="/dashboard" tooltip={{ children: 'Dashboard' }}>
+                        <LayoutDashboard />
+                        Dashboard
                     </NavButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

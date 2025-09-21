@@ -42,6 +42,12 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 type HistoryItem = {
   id: string;
@@ -130,14 +136,14 @@ export default function HistoryPage() {
   const renderQuery = (item: HistoryItem) => {
     if (item.text) {
       return (
-        <p className="truncate text-sm text-muted-foreground">
+        <p className="truncate text-sm font-medium">
           Text: {item.text}
         </p>
       );
     }
     if (item.url) {
       return (
-        <p className="truncate text-sm text-muted-foreground">
+        <p className="truncate text-sm font-medium">
           URL:{' '}
           <a
             href={item.url}
@@ -150,7 +156,7 @@ export default function HistoryPage() {
         </p>
       );
     }
-    return <p className="text-sm text-muted-foreground">Image Analysis</p>;
+    return <p className="text-sm font-medium">Image Analysis</p>;
   };
 
   return (
@@ -255,34 +261,36 @@ export default function HistoryPage() {
         )}
 
         {!loading && !error && filteredHistory.length > 0 && (
-          <div className="space-y-4">
+          <Accordion type="single" collapsible className="w-full space-y-2">
             {filteredHistory.map((item) => (
-              <Card key={item.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="mb-1">{renderQuery(item)}</CardTitle>
-                      <CardDescription>
-                        {item.timestamp?.toDate().toLocaleString()}
-                      </CardDescription>
-                    </div>
-                    <Badge variant={getVerdictBadgeVariant(item.verdict)}>
-                      {item.verdict}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {item.explanation}
-                  </p>
-                </CardContent>
-              </Card>
+              <AccordionItem value={item.id} key={item.id} className='border-b-0'>
+                <Card>
+                  <AccordionTrigger className="p-6 hover:no-underline">
+                     <div className="flex w-full items-start justify-between">
+                        <div className='text-left'>
+                          <CardTitle className="mb-1 text-base">{renderQuery(item)}</CardTitle>
+                          <CardDescription>
+                            {item.timestamp?.toDate().toLocaleString()}
+                          </CardDescription>
+                        </div>
+                        <Badge variant={getVerdictBadgeVariant(item.verdict)} className="ml-4">
+                          {item.verdict}
+                        </Badge>
+                      </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <CardContent className='pt-0'>
+                      <p className="text-sm text-muted-foreground">
+                        {item.explanation}
+                      </p>
+                    </CardContent>
+                  </AccordionContent>
+                </Card>
+              </AccordionItem>
             ))}
-          </div>
+          </Accordion>
         )}
       </main>
     </div>
   );
 }
-
-    

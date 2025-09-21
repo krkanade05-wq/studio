@@ -2,7 +2,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useLayoutEffect } from 'react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -39,20 +39,22 @@ export default function AuthLayout({
   const [loading, setLoading] = useState(false);
   const [previousPath, setPreviousPath] = useState(pathname);
 
-  useEffect(() => {
+  // Use useLayoutEffect to immediately trigger state change before the browser paints
+  useLayoutEffect(() => {
     if (pathname !== previousPath) {
       setLoading(true);
+      // Update previousPath here to ensure it's set for the next navigation
+      setPreviousPath(pathname);
     }
   }, [pathname, previousPath]);
   
   useEffect(() => {
-      // This effect runs after the page component has rendered.
+      // This effect runs after the page component has rendered and painted.
       // We can safely turn off the loading indicator here.
       if (loading) {
           setLoading(false);
-          setPreviousPath(pathname);
       }
-  }, [pathname, loading]);
+  }, [pathname, loading]); // This effect depends on the pathname, so it runs after navigation
 
 
   return (

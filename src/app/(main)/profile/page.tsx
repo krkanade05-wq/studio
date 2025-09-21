@@ -241,22 +241,28 @@ export default function ProfilePage() {
 
 
         <Card>
-          <CardHeader>
-            <CardTitle>User Profile</CardTitle>
-            <CardDescription>Manage your account information.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} disabled={!isEditing} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} disabled />
-              </div>
-               {isEditing && (
-                <>
+            <CardHeader className='flex-row items-center justify-between'>
+                <div>
+                    <CardTitle>User Profile</CardTitle>
+                    <CardDescription>Manage your account information.</CardDescription>
+                </div>
+                {!isEditing && (
+                    <Button type="button" onClick={handleEditToggle}>
+                        Edit Profile
+                    </Button>
+                )}
+            </CardHeader>
+            <CardContent>
+            {isEditing ? (
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" value={email} disabled />
+                    </div>
                     <div className="space-y-2">
                         <Label htmlFor="mobile">Mobile Number</Label>
                         <Input id="mobile" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="Enter your mobile number" />
@@ -265,25 +271,35 @@ export default function ProfilePage() {
                         <Label htmlFor="address">Address</Label>
                         <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter your address" />
                     </div>
-                </>
-               )}
-              <div className="flex gap-2">
-                {isEditing ? (
-                  <>
-                    <Button type="submit" disabled={isUpdating}>
-                      {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Save Changes'}
-                    </Button>
-                    <Button type="button" variant="outline" onClick={handleEditToggle}>
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
-                  <Button type="button" onClick={handleEditToggle}>
-                    Edit Profile
-                  </Button>
-                )}
-              </div>
-            </form>
+                    <div className="flex gap-2">
+                        <Button type="submit" disabled={isUpdating}>
+                            {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Save Changes'}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={handleEditToggle}>
+                            Cancel
+                        </Button>
+                    </div>
+                </form>
+            ) : (
+                 <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input id="name" value={name} disabled />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" value={email} disabled />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="mobile">Mobile Number</Label>
+                        <Input id="mobile" value={mobile} placeholder="Not set" disabled />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="address">Address</Label>
+                        <Input id="address" value={address} placeholder="Not set" disabled />
+                    </div>
+                </div>
+            )}
           </CardContent>
         </Card>
 
@@ -336,7 +352,7 @@ export default function ProfilePage() {
                 </AlertDialogHeader>
                  <div className="space-y-2">
                     <Label htmlFor="delete-confirm-password">Current Password</Label>
-                    <Input id="delete-confirm-password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
+                    <Input id="delete-confirm-password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.targe.value)} required />
                 </div>
                 <AlertDialogFooter>
                   <AlertDialogCancel onClick={() => setIsDeleting(false)}>Cancel</AlertDialogCancel>
@@ -353,5 +369,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    

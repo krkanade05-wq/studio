@@ -7,7 +7,7 @@ import { initializeApp, getApp, getApps } from "firebase/app";
 const firebaseConfig = {
   "projectId": "studio-8182373574-a1bcb",
   "appId": "1:582602115508:web:4f27ab2909363e94cb0ae1",
-  "apiKey": "AIzaSyDis2q5AQb3PxxUKF54cTOIWeaTO1BIllw",
+  "apiKey": "AIzaSyALTWBrB0s_-BrXXd5KbmBN6roSOloyIFE",
   "authDomain": "studio-8182373574-a1bcb.firebaseapp.com",
   "measurementId": "",
   "messagingSenderId": "582602115508"

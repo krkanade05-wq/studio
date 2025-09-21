@@ -334,7 +334,7 @@ function MainLayout({
   );
 }
 
-export default function RootAuthLayout({ children }: {children: React.ReactNode}) {
+export default function RootAuthLayout({ children }: {children: React.Node}) {
     return (
         <AuthProvider>
             <LoadingProvider>

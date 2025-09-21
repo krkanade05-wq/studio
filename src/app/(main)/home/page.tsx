@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -377,8 +378,8 @@ function TrendingReports() {
             {trending.map((report, index) => (
               <AccordionItem value={`item-${index}`} key={index}>
                 <AccordionTrigger>
-                  <div className="flex w-full items-center justify-between pr-4">
-                    <span className="text-sm font-medium truncate w-3/4">
+                  <div className="flex w-full items-center justify-between pr-4 text-left">
+                    <span className="text-sm font-medium">
                       {report.content}
                     </span>
                     <Badge variant="secondary">{report.count} reports</Badge>
@@ -444,3 +445,5 @@ export default function AppRootPage() {
       </div>
   );
 }
+
+    

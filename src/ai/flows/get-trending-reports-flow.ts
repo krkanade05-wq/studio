@@ -22,6 +22,8 @@ import { db } from '@/lib/firebase/firebase';
 const TrendingReportSchema = z.object({
   content: z.string().describe('The reported content (text or URL).'),
   count: z.number().describe('The number of times this content was reported.'),
+  description: z.string().optional().describe('The most recent description provided for the report.'),
+  lastReportedAt: z.any().describe('The timestamp of the most recent report.'),
 });
 
 export type TrendingReport = z.infer<typeof TrendingReportSchema>;
@@ -31,6 +33,12 @@ const GetTrendingReportsOutputSchema = z.array(TrendingReportSchema);
 export async function getTrendingReports(): Promise<TrendingReport[]> {
   return getTrendingReportsFlow();
 }
+
+type AggregatedReport = {
+  count: number;
+  lastDescription?: string;
+  lastReportedAt: Timestamp;
+};
 
 const getTrendingReportsFlow = ai.defineFlow(
   {
@@ -50,23 +58,41 @@ const getTrendingReportsFlow = ai.defineFlow(
     );
     const querySnapshot = await getDocs(q);
 
-    // 3. Aggregate the report counts
-    const reportCounts: { [content: string]: number } = {};
+    // 3. Aggregate the report counts, descriptions, and latest timestamp
+    const reportAggregates: Record<string, AggregatedReport> = {};
     querySnapshot.forEach((doc) => {
-      const content = doc.data().content;
+      const data = doc.data();
+      const content = data.content;
       if (content) {
-        reportCounts[content] = (reportCounts[content] || 0) + 1;
+        if (!reportAggregates[content]) {
+          reportAggregates[content] = {
+            count: 0,
+            lastReportedAt: data.timestamp,
+            lastDescription: data.description,
+          };
+        }
+        reportAggregates[content].count++;
+        // Keep the latest report's details
+        if (data.timestamp > reportAggregates[content].lastReportedAt) {
+          reportAggregates[content].lastReportedAt = data.timestamp;
+          if (data.description) {
+            reportAggregates[content].lastDescription = data.description;
+          }
+        }
       }
     });
 
     // 4. Convert to an array, sort by count, and take the top 5
-    const sortedReports = Object.entries(reportCounts)
-      .map(([content, count]) => ({ content, count }))
+    const sortedReports: TrendingReport[] = Object.entries(reportAggregates)
+      .map(([content, aggregate]) => ({
+        content,
+        count: aggregate.count,
+        description: aggregate.lastDescription,
+        lastReportedAt: aggregate.lastReportedAt,
+      }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
     return sortedReports;
   }
 );
-
-    

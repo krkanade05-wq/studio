@@ -39,6 +39,7 @@ import {
   Type,
   Upload,
   BarChart,
+  Clock,
 } from 'lucide-react';
 import { useState, useEffect, useActionState, useRef } from 'react';
 import Image from 'next/image';
@@ -53,6 +54,13 @@ import { Label } from '@/components/ui/label';
 import { getTrendingReports } from '@/ai/flows/get-trending-reports-flow';
 import type { TrendingReport } from '@/ai/flows/get-trending-reports-flow';
 import { Badge } from '@/components/ui/badge';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { formatDistanceToNow } from 'date-fns';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -326,6 +334,13 @@ function TrendingReports() {
     return () => clearInterval(interval);
   }, []);
 
+  const formatTimestamp = (timestamp: any) => {
+    if (timestamp && typeof timestamp.toDate === 'function') {
+      return formatDistanceToNow(timestamp.toDate(), { addSuffix: true });
+    }
+    return 'N/A';
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -357,16 +372,31 @@ function TrendingReports() {
             </AlertDescription>
           </Alert>
         ) : (
-          <ul className="space-y-4">
+          <Accordion type="single" collapsible className="w-full">
             {trending.map((report, index) => (
-              <li key={index} className="flex items-start justify-between">
-                <span className="text-sm text-muted-foreground truncate pr-4">
-                  {index + 1}. {report.content}
-                </span>
-                <Badge variant="secondary">{report.count} reports</Badge>
-              </li>
+              <AccordionItem value={`item-${index}`} key={index}>
+                <AccordionTrigger>
+                  <div className="flex w-full items-center justify-between pr-4">
+                    <span className="text-sm font-medium truncate">
+                      {index + 1}. {report.content}
+                    </span>
+                    <Badge variant="secondary">{report.count} reports</Badge>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-2">
+                  {report.description && (
+                    <p className="text-sm text-muted-foreground italic">
+                      &quot;{report.description}&quot;
+                    </p>
+                  )}
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    <Clock className="mr-1.5 h-3 w-3" />
+                    Last reported: {formatTimestamp(report.lastReportedAt)}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </ul>
+          </Accordion>
         )}
       </CardContent>
     </Card>
@@ -408,5 +438,3 @@ export default function AppRootPage() {
       </div>
   );
 }
-
-    

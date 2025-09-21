@@ -41,7 +41,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { getAuth, signOut } from 'firebase/auth';
+import { getAuth, signOut, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { app } from '@/lib/firebase/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { ContentCheckerProvider } from '@/contexts/content-checker-context';
@@ -54,6 +54,41 @@ type LoadingContextType = {
 };
 
 const LoadingContext = createContext<LoadingContextType | null>(null);
+
+function AuthGuard({ children }: { children: React.ReactNode }) {
+    const auth = getAuth(app);
+    const router = useRouter();
+    const [user, setUser] = useState<FirebaseUser | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUser(user);
+            } else {
+                router.push('/sign-in');
+            }
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [auth, router]);
+
+    if (loading) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
+    
+    if (!user) {
+        return null; // The redirect is handled in the effect
+    }
+
+    return <>{children}</>;
+}
+
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -179,74 +214,76 @@ export default function MainLayout({
 
   return (
     <LoadingProvider>
-        <SidebarProvider>
-        <Sidebar>
-            <SidebarContent>
-              <SidebarHeader>
-                  <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-6 w-6 text-primary" />
-                  <h1 className="text-xl font-semibold">Content Checker</h1>
-                  </div>
-              </SidebarHeader>
-              <SidebarMenu>
-                  <SidebarMenuItem>
-                      <NavButton href="/home" tooltip={{ children: 'Home' }}>
-                          <Home />
-                          Home
-                      </NavButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                      <NavButton href="/dashboard" tooltip={{ children: 'Dashboard' }}>
-                          <LayoutDashboard />
-                          Dashboard
-                      </NavButton>
-                  </SidebarMenuItem>
-                   <SidebarMenuItem>
-                      <NavButton href="/dashboard/history" tooltip={{ children: 'History' }}>
-                          <History />
-                          History
-                      </NavButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                      <NavButton href="/dashboard/learn" tooltip={{ children: 'Learn' }}>
-                          <LifeBuoy />
-                          Learn
-                      </NavButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                      <NavButton href="/dashboard/profile" tooltip={{ children: 'Profile' }}>
-                          <User />
-                          Profile
-                      </NavButton>
-                  </SidebarMenuItem>
-              </SidebarMenu>
-              <div className='mt-auto'>
+        <AuthGuard>
+            <SidebarProvider>
+            <Sidebar>
+                <SidebarContent>
+                <SidebarHeader>
+                    <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-6 w-6 text-primary" />
+                    <h1 className="text-xl font-semibold">Content Checker</h1>
+                    </div>
+                </SidebarHeader>
                 <SidebarMenu>
-                  <SidebarMenuItem>
-                    <Button onClick={handleSignOut} variant="ghost" className="w-full justify-start">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
-                    </Button>
-                  </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <NavButton href="/home" tooltip={{ children: 'Home' }}>
+                            <Home />
+                            Home
+                        </NavButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <NavButton href="/dashboard" tooltip={{ children: 'Dashboard' }}>
+                            <LayoutDashboard />
+                            Dashboard
+                        </NavButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <NavButton href="/dashboard/history" tooltip={{ children: 'History' }}>
+                            <History />
+                            History
+                        </NavButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <NavButton href="/dashboard/learn" tooltip={{ children: 'Learn' }}>
+                            <LifeBuoy />
+                            Learn
+                        </NavButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <NavButton href="/dashboard/profile" tooltip={{ children: 'Profile' }}>
+                            <User />
+                            Profile
+                        </NavButton>
+                    </SidebarMenuItem>
                 </SidebarMenu>
-              </div>
-            </SidebarContent>
-        </Sidebar>
-        <SidebarInset>
-            <header className="flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
-            <Link href="/home" className="flex items-center gap-2 font-semibold">
-                <ShieldCheck className="h-6 w-6 text-primary" />
-                <span className="">Content Checker</span>
-            </Link>
-            <SidebarTrigger>
-                <PanelLeft />
-            </SidebarTrigger>
-            </header>
-            <ContentCheckerProvider>
-                <div className="flex-1 overflow-y-auto">{children}</div>
-            </ContentCheckerProvider>
-        </SidebarInset>
-        </SidebarProvider>
+                <div className='mt-auto'>
+                    <SidebarMenu>
+                    <SidebarMenuItem>
+                        <Button onClick={handleSignOut} variant="ghost" className="w-full justify-start">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                        </Button>
+                    </SidebarMenuItem>
+                    </SidebarMenu>
+                </div>
+                </SidebarContent>
+            </Sidebar>
+            <SidebarInset>
+                <header className="flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
+                <Link href="/home" className="flex items-center gap-2 font-semibold">
+                    <ShieldCheck className="h-6 w-6 text-primary" />
+                    <span className="">Content Checker</span>
+                </Link>
+                <SidebarTrigger>
+                    <PanelLeft />
+                </SidebarTrigger>
+                </header>
+                <ContentCheckerProvider>
+                    <div className="flex-1 overflow-y-auto">{children}</div>
+                </ContentCheckerProvider>
+            </SidebarInset>
+            </SidebarProvider>
+        </AuthGuard>
     </LoadingProvider>
   );
 }

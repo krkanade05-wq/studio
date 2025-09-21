@@ -177,7 +177,8 @@ const useLoading = () => {
 const NavButton = ({ href, children, tooltip }: { href: string; children: React.ReactNode, tooltip: {children: string} }) => {
   const pathname = usePathname();
   const { showLoading } = useLoading();
-  const isActive = pathname === href;
+  const isActive = pathname === href || (href === '/dashboard' && pathname.startsWith('/dashboard/'));
+
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -311,16 +312,16 @@ function MainLayout({
   );
 }
 
-function WrappedMainLayout(props: { children: React.ReactNode }) {
+export default function RootAuthLayout({ children }: {children: React.ReactNode}) {
     return (
         <AuthProvider>
             <LoadingProvider>
                 <ContentCheckerProvider>
-                    <MainLayout {...props} />
+                    <MainLayout>
+                        {children}
+                    </MainLayout>
                 </ContentCheckerProvider>
             </LoadingProvider>
         </AuthProvider>
     );
 }
-
-export default WrappedMainLayout;

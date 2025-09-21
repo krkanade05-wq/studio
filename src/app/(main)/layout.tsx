@@ -304,6 +304,12 @@ function MainLayout({
                 <div className='mt-auto'>
                     <SidebarMenu>
                     <SidebarMenuItem>
+                        <NavButton href="/help" tooltip={{ children: 'Help' }}>
+                            <LifeBuoy />
+                            Help
+                        </NavButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
                         <Button onClick={handleSignOut} variant="ghost" className="w-full justify-start">
                         <LogOut className="mr-2 h-4 w-4" />
                         Sign Out

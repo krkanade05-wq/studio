@@ -222,7 +222,13 @@ export default function ProfilePage() {
   const handleDeleteAccount = async () => {
     if (!user || !user.email) return;
 
+    setDialog({
+        isOpen: true,
+        title: 'Deleting Account...',
+        description: 'Please wait while we permanently delete your account and all associated data.'
+    });
     setIsDeleting(true);
+
     try {
       // Re-authenticate user
       const credential = EmailAuthProvider.credential(user.email, currentPassword);
@@ -262,8 +268,11 @@ export default function ProfilePage() {
         description: description,
         variant: 'destructive',
       });
-      setIsDeleting(false);
-    } 
+    } finally {
+        setIsDeleting(false);
+        setDialog({ isOpen: false, title: '', description: '' });
+        setCurrentPassword('');
+    }
   };
   
   const closeDialog = () => {
@@ -442,9 +451,8 @@ export default function ProfilePage() {
                     <Input id="delete-confirm-password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => { setIsDeleting(false); setCurrentPassword('')}}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteAccount} disabled={isDeleting || !currentPassword}>
-                     {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <AlertDialogCancel onClick={() => { setCurrentPassword('')}}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteAccount} disabled={!currentPassword}>
                     Confirm Deletion
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -457,16 +465,21 @@ export default function ProfilePage() {
         <AlertDialog open={dialog.isOpen} onOpenChange={(isOpen) => !isOpen && closeDialog()}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>{dialog.title}</AlertDialogTitle>
+                    <AlertDialogTitle className={isDeleting ? 'flex items-center' : ''}>
+                        {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {dialog.title}
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
                         {dialog.description}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogAction onClick={closeDialog}>
-                        OK
-                    </AlertDialogAction>
-                </AlertDialogFooter>
+                {!isDeleting && (
+                    <AlertDialogFooter>
+                        <AlertDialogAction onClick={closeDialog}>
+                            OK
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                )}
             </AlertDialogContent>
         </AlertDialog>
 

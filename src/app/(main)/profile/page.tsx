@@ -34,6 +34,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2, UploadCloud } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
+import imageCompression from 'browser-image-compression';
 
 export default function ProfilePage() {
   const auth = getAuth(app);
@@ -122,22 +123,31 @@ export default function ProfilePage() {
     if (!imageFile || !user) return;
 
     setIsUploading(true);
-    const storageRef = ref(storage, `profile_pictures/${user.uid}`);
-    try {
-        await uploadBytes(storageRef, imageFile);
-        const photoURL = await getDownloadURL(storageRef);
-        await updateProfile(user, { photoURL });
-        
-        // Force refresh user to get new photoURL
-        await user.reload();
-        // create a new user object to trigger re-render
-        setUser(auth.currentUser ? { ...auth.currentUser } : null);
 
-        toast({
-            title: 'Success',
-            description: 'Profile picture updated successfully.'
-        });
-        setImageFile(null);
+    const options = {
+      maxSizeMB: 0.5, // (max file size in MB)
+      maxWidthOrHeight: 400, // (max width or height in pixels)
+      useWebWorker: true,
+    };
+
+    try {
+      const compressedFile = await imageCompression(imageFile, options);
+      const storageRef = ref(storage, `profile_pictures/${user.uid}`);
+      
+      await uploadBytes(storageRef, compressedFile);
+      const photoURL = await getDownloadURL(storageRef);
+      await updateProfile(user, { photoURL });
+      
+      // Force refresh user to get new photoURL
+      await user.reload();
+      // create a new user object to trigger re-render
+      setUser(auth.currentUser ? { ...auth.currentUser } : null);
+
+      toast({
+          title: 'Success',
+          description: 'Profile picture updated successfully.'
+      });
+      setImageFile(null);
     } catch (error: any) {
         toast({
             title: 'Upload Failed',

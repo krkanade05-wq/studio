@@ -26,6 +26,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 const FormSchema = z.object({
   email: z.string().email({
@@ -42,6 +43,8 @@ export function ForgotPasswordForm() {
       email: '',
     },
   });
+
+  const { isSubmitting } = form.formState;
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
@@ -86,7 +89,8 @@ export function ForgotPasswordForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Send Reset Link
             </Button>
           </form>

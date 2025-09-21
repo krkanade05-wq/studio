@@ -5,7 +5,6 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarHeader,
   SidebarInset,
   SidebarMenu,
   SidebarMenuItem,
@@ -14,7 +13,6 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import {
-  FileText,
   LayoutDashboard,
   LifeBuoy,
   User,
@@ -161,90 +159,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-    const router = useRouter();
-    const { toast } = useToast();
-    const auth = getAuth(app);
-    
-    const handleSignOut = async () => {
-        try {
-        await signOut(auth);
-        router.push('/sign-in');
-        } catch (error) {
-        console.error('Sign Out Error', error);
-        toast({
-            title: 'Error Signing Out',
-            description: 'An unexpected error occurred.',
-            variant: 'destructive'
-        })
-        }
-    };
-
   return (
-    <LoadingProvider>
-        <SidebarProvider>
-        <Sidebar>
-            <SidebarContent>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <NavButton href="/home" tooltip={{ children: 'Home' }}>
-                        <Home />
-                        Home
-                    </NavButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <NavButton href="/dashboard" tooltip={{ children: 'Dashboard' }}>
-                        <LayoutDashboard />
-                        Dashboard
-                    </NavButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <NavButton href="/dashboard/history" tooltip={{ children: 'History' }}>
-                        <History />
-                        History
-                    </NavButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                     <NavButton href="/dashboard/learn" tooltip={{ children: 'Learn' }}>
-                        <LifeBuoy />
-                        Learn
-                    </NavButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <NavButton href="/dashboard/profile" tooltip={{ children: 'Profile' }}>
-                        <User />
-                        Profile
-                    </NavButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-            <div className='mt-auto'>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <Button onClick={handleSignOut} variant="ghost" className="w-full justify-start">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
-                    </Button>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-                <Separator className="my-1" />
-                 <div className="p-2 text-xs text-center text-sidebar-foreground/50">
-                    &copy; 2025
-                </div>
-              </div>
-            </SidebarContent>
-        </Sidebar>
-        <SidebarInset>
-            <header className="flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
-            <Link href="/home" className="flex items-center gap-2 font-semibold">
-                <ShieldCheck className="h-6 w-6 text-primary" />
-                <span className="">Content Checker</span>
-            </Link>
-            <SidebarTrigger>
-                <PanelLeft />
-            </SidebarTrigger>
-            </header>
-            <div className="flex-1 overflow-y-auto">{children}</div>
-        </SidebarInset>
-        </SidebarProvider>
-    </LoadingProvider>
+    <div className="flex-1 overflow-y-auto">{children}</div>
   );
 }

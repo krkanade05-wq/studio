@@ -41,13 +41,13 @@ import {
   Upload,
   BarChart,
   Clock,
-  MessageSquareQuote,
 } from 'lucide-react';
 import { useState, useEffect, useActionState, useRef } from 'react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 
 import AnalysisResult from '@/components/home/analysis-result';
+import GenerateReply from '@/components/home/generate-reply';
 import { useContentChecker } from '@/contexts/content-checker-context';
 import { auth } from '@/lib/firebase/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -127,6 +127,8 @@ function ContentChecker() {
           <CardContent>
             <form action={formAction}>
                 {user && <input type="hidden" name="userId" value={user.uid} />}
+                 {analysisState.originalContent && <input type="hidden" name="originalContent" value={JSON.stringify(analysisState.originalContent)} />}
+
               <Tabs
                 defaultValue="text"
                 value={activeTab}
@@ -379,7 +381,7 @@ function TrendingReports() {
               <AccordionItem value={`item-${index}`} key={index}>
                 <AccordionTrigger>
                   <div className="flex w-full items-center justify-between pr-4 text-left">
-                    <span className="text-sm font-medium">
+                    <span className="flex-1 text-sm font-medium text-left">
                       {report.content}
                     </span>
                     <Badge variant="secondary">{report.count} reports</Badge>
@@ -429,11 +431,18 @@ export default function AppRootPage() {
             )}
       
             {analysisState.status === 'success' && analysisState.verdict && (
-              <AnalysisResult
-                verdict={analysisState.verdict}
-                explanation={analysisState.explanation}
-                evidence={analysisState.evidence}
-              />
+              <>
+                <AnalysisResult
+                  verdict={analysisState.verdict}
+                  explanation={analysisState.explanation}
+                  evidence={analysisState.evidence}
+                />
+                <GenerateReply
+                  originalContent={analysisState.originalContent}
+                  verdict={analysisState.verdict}
+                  explanation={analysisState.explanation}
+                />
+              </>
             )}
 
             <ReportContent />
@@ -445,5 +454,3 @@ export default function AppRootPage() {
       </div>
   );
 }
-
-    

@@ -14,6 +14,7 @@ export type AnalysisState = {
   verdict?: AnalyzeContentOutput['verdict'];
   explanation?: string;
   evidence?: AnalyzeContentOutput['evidence'];
+  originalContent?: AnalyzeContentInput;
 };
 
 async function saveToHistory(userId: string, input: AnalyzeContentInput, result: AnalyzeContentOutput) {
@@ -80,6 +81,7 @@ export async function checkContentAction(
       verdict: result.verdict,
       explanation: result.explanation,
       evidence: result.evidence,
+      originalContent: analysisInput,
     };
   } catch (error) {
     console.error('Analysis failed:', error);

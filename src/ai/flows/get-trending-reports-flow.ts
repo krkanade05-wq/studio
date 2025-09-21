@@ -82,7 +82,7 @@ const getTrendingReportsFlow = ai.defineFlow(
       }
     });
 
-    // 4. Convert to an array, sort by count, and take the top 5
+    // 4. Convert to an array, sort by last reported time, and take the top 5
     const sortedReports = Object.entries(reportAggregates)
       .map(([content, aggregate]) => ({
         content,
@@ -90,7 +90,7 @@ const getTrendingReportsFlow = ai.defineFlow(
         description: aggregate.lastDescription,
         lastReportedAt: aggregate.lastReportedAt.toDate().toISOString(), // Convert Timestamp to ISO string
       }))
-      .sort((a, b) => b.count - a.count)
+      .sort((a, b) => b.lastReportedAt.localeCompare(a.lastReportedAt))
       .slice(0, 5);
 
     return sortedReports;

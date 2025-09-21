@@ -201,7 +201,7 @@ const NavButton = ({ href, children, tooltip }: { href: string; children: React.
 };
 
 
-export default function MainLayout({
+function MainLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -329,4 +329,5 @@ function WrappedMainLayout(props: { children: React.ReactNode }) {
 // The final export must be a default export.
 // We are re-exporting our wrapped layout.
 export default WrappedMainLayout;
+
 

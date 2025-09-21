@@ -3,7 +3,32 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { LoadingBar } from '@/components/ui/loading-bar';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Loader2 } from 'lucide-react';
+
+export function LoadingPopup({ isOpen }: { isOpen: boolean }) {
+  return (
+    <AlertDialog open={isOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center justify-center text-center">
+            <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+            Loading Page...
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-center pt-2">
+            Please wait a moment.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 export default function AuthLayout({
   children,
@@ -13,23 +38,25 @@ export default function AuthLayout({
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
 
+  // This effect tracks navigation and shows the loading popup.
+  // A short timer is used to prevent flickering on very fast navigations.
   useEffect(() => {
-    // When the path changes, a navigation has started.
-    setLoading(true);
+    const handleStart = () => setLoading(true);
+    const handleComplete = () => setLoading(false);
+    
+    handleStart();
     const timer = setTimeout(() => {
-        // A small delay to allow the new page to render.
-        setLoading(false);
-    }, 500); // You can adjust the duration as needed
+        handleComplete();
+    }, 500); // Adjust duration as needed
 
-    // This cleanup function will run when the component unmounts
-    // or before the effect runs again.
     return () => clearTimeout(timer);
+    
   }, [pathname]);
 
 
   return (
     <>
-      <LoadingBar loading={loading} />
+      <LoadingPopup isOpen={loading} />
       <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
         {children}
       </div>

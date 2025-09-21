@@ -12,15 +12,24 @@ import {
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
   AlertCircle,
   CheckCircle,
+  Fish,
   Gamepad2,
+  GraduationCap,
+  Lightbulb,
   Loader2,
   ShieldX,
   Trophy,
   XCircle,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   generateStatement,
   verifyStatement,
@@ -31,6 +40,95 @@ import { Progress } from '@/components/ui/progress';
 
 type GameState = 'idle' | 'loading' | 'playing' | 'answered';
 const TOTAL_QUESTIONS = 5;
+
+function LearningHub() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-3xl font-bold flex items-center gap-3">
+          <GraduationCap className="h-8 w-8" />
+          Learning Hub
+        </CardTitle>
+        <CardDescription>
+          Expand your knowledge on how to identify and combat misinformation.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Accordion type="single" collapsible className="w-full space-y-2">
+          <AccordionItem value="item-1">
+            <AccordionTrigger>
+                <div className='flex items-center gap-3'>
+                    <Lightbulb />
+                    What is Misinformation? A Quick Guide
+                </div>
+            </AccordionTrigger>
+            <AccordionContent className='prose prose-sm max-w-none text-muted-foreground'>
+              <p>
+                <strong>Misinformation</strong> is false or inaccurate information that is spread, regardless of intent to deceive. It's different from <strong>disinformation</strong>, which is deliberately created and shared to mislead people.
+              </p>
+              <h4>Key Characteristics:</h4>
+              <ul>
+                <li>It often plays on emotions like fear, anger, or excitement.</li>
+                <li>It can be based on a grain of truth but is twisted or taken out of context.</li>
+                <li>It spreads rapidly on social media through shares and reposts.</li>
+              </ul>
+              <h4>How to Prevent It:</h4>
+              <p>
+                Always pause and think before sharing. Check the source, look for evidence, and if you're unsure, don't share it. A quick search on a reputable fact-checking website can often reveal the truth.
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-2">
+            <AccordionTrigger>
+                 <div className='flex items-center gap-3'>
+                    <Fish />
+                    What is Phishing? Don't Get Hooked
+                </div>
+            </AccordionTrigger>
+            <AccordionContent className='prose prose-sm max-w-none text-muted-foreground'>
+              <p>
+                <strong>Phishing</strong> is a type of scam where attackers impersonate a legitimate organization (like a bank, a social media site, or your email provider) to trick you into giving up sensitive information.
+              </p>
+              <h4>Common Tactics:</h4>
+              <ul>
+                <li>Emails or text messages with a sense of urgency, like "Your account has been compromised, click here to secure it."</li>
+                <li>Fake login pages that look identical to the real ones.</li>
+                <li>Unexpected attachments or links from seemingly known contacts whose accounts may have been hacked.</li>
+              </ul>
+              <h4>How to Spot It:</h4>
+              <p>
+                Check the sender's email address for slight misspellings. Hover over links to see the actual URL before clicking. Be wary of generic greetings like "Dear Customer." And remember, a real company will never ask for your password via email.
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-3">
+            <AccordionTrigger>
+                <div className='flex items-center gap-3'>
+                    <ShieldX />
+                    Recognizing Common Online Scams
+                </div>
+            </AccordionTrigger>
+            <AccordionContent className='prose prose-sm max-w-none text-muted-foreground'>
+              <p>
+                Scammers are always finding new ways to trick people, but many scams fall into common categories.
+              </p>
+              <h4>Examples of Scams:</h4>
+              <ul>
+                <li><strong>"You've Won a Prize!"</strong>: A classic scam that asks you to pay a small fee to receive a large prize that never materializes.</li>
+                <li><strong>Tech Support Scams</strong>: A pop-up or call warns you of a virus on your computer and asks for remote access or payment to "fix" a non-existent problem.</li>
+                <li><strong>Investment Scams</strong>: Promises of guaranteed high returns with little to no risk. If it sounds too good to be true, it probably is.</li>
+              </ul>
+              <h4>Golden Rule:</h4>
+              <p>
+                Be skeptical of unsolicited offers. Never give out personal information, financial details, or passwords to someone who contacted you unexpectedly. Verify any request through an official, separate channel (e.g., call the company's official phone number).
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function GamePage() {
   const [gameState, setGameState] = useState<GameState>('idle');
@@ -135,7 +233,7 @@ export default function GamePage() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-transparent p-4 md:p-8">
-      <main className="mx-auto w-full max-w-2xl">
+      <main className="mx-auto w-full max-w-2xl space-y-8">
         <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle className="text-3xl font-bold flex items-center gap-3">
@@ -272,7 +370,11 @@ export default function GamePage() {
             )}
           </CardFooter>
         </Card>
+        
+        <LearningHub />
       </main>
     </div>
   );
 }
+
+    

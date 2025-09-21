@@ -37,21 +37,22 @@ export default function AuthLayout({
 }>) {
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
+  const [previousPath, setPreviousPath] = useState(pathname);
 
-  // This effect tracks navigation and shows the loading popup.
-  // A short timer is used to prevent flickering on very fast navigations.
   useEffect(() => {
-    const handleStart = () => setLoading(true);
-    const handleComplete = () => setLoading(false);
-    
-    handleStart();
-    const timer = setTimeout(() => {
-        handleComplete();
-    }, 500); // Adjust duration as needed
-
-    return () => clearTimeout(timer);
-    
-  }, [pathname]);
+    if (pathname !== previousPath) {
+      setLoading(true);
+    }
+  }, [pathname, previousPath]);
+  
+  useEffect(() => {
+      // This effect runs after the page component has rendered.
+      // We can safely turn off the loading indicator here.
+      if (loading) {
+          setLoading(false);
+          setPreviousPath(pathname);
+      }
+  }, [pathname, loading]);
 
 
   return (

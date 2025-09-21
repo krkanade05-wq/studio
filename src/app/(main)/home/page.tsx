@@ -79,7 +79,7 @@ function SubmitButton() {
 }
 
 function ContentChecker() {
-    const { analysisState, formAction } = useContentChecker();
+    const { analysisState, formAction, resetAnalysis } = useContentChecker();
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [imageError, setImageError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState('text');
@@ -91,6 +91,11 @@ function ContentChecker() {
         });
         return () => unsubscribe();
     }, []);
+
+    const handleTabChange = (value: string) => {
+      setActiveTab(value);
+      resetAnalysis();
+    };
   
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
@@ -132,7 +137,7 @@ function ContentChecker() {
               <Tabs
                 defaultValue="text"
                 value={activeTab}
-                onValueChange={setActiveTab}
+                onValueChange={handleTabChange}
                 className="w-full"
               >
                 <TabsList className="grid w-full grid-cols-3">

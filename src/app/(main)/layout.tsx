@@ -288,7 +288,7 @@ function MainLayout({
                         </Button>
                     </SidebarMenuItem>
                     </SidebarMenu>
-                     <div className="p-4 text-xs text-center text-sidebar-foreground/50">
+                     <div className="p-2 text-xs text-center text-sidebar-foreground/50">
                         &copy; 2025
                     </div>
                 </div>
@@ -325,6 +325,7 @@ function WrappedMainLayout(props: { children: React.ReactNode }) {
 }
 
 export default WrappedMainLayout;
+
 
 
 

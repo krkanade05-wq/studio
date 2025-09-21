@@ -183,12 +183,6 @@ export default function DashboardLayout({
         <SidebarProvider>
         <Sidebar>
             <SidebarContent>
-            <SidebarHeader>
-                <div className="flex items-center gap-2">
-                <ShieldCheck className="h-6 w-6 text-primary" />
-                <h1 className="text-xl font-semibold">Content Checker</h1>
-                </div>
-            </SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
                     <NavButton href="/home" tooltip={{ children: 'Home' }}>
@@ -230,6 +224,9 @@ export default function DashboardLayout({
                     </Button>
                   </SidebarMenuItem>
                 </SidebarMenu>
+                 <div className="p-2 text-xs text-center text-sidebar-foreground/50">
+                    &copy; 2025
+                </div>
               </div>
             </SidebarContent>
         </Sidebar>

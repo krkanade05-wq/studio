@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, User } from 'firebase/auth';
 import { app, db } from '@/lib/firebase/firebase';
-import { collection, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -79,12 +79,7 @@ export default function ProfilePage() {
   }, [auth, router]);
 
   const fetchHistoryCount = async (userId: string) => {
-     try {
-        const querySnapshot = await getDocs(collection(db, `users/${userId}/history`));
-        setTotalChecks(querySnapshot.size);
-    } catch (error) {
-        console.error("Error fetching history count: ", error);
-    }
+    // This part is removed as there is no history collection for each user
   }
 
   const fetchUserProfile = async (userId: string) => {
@@ -182,9 +177,13 @@ export default function ProfilePage() {
       });
       handlePasswordEditToggle();
     } catch (error: any) {
+      let description = 'An unexpected error occurred. Please try again.';
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        description = 'The current password you entered is incorrect.';
+      }
       toast({
         title: 'Error changing password',
-        description: error.message,
+        description: description,
         variant: 'destructive',
       });
     } finally {
@@ -206,9 +205,13 @@ export default function ProfilePage() {
       });
       router.push('/sign-up');
     } catch (error: any) {
+      let description = 'An unexpected error occurred. Please try again.';
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        description = 'The password you entered is incorrect.';
+      }
       toast({
         title: 'Error deleting account',
-        description: error.message,
+        description: description,
         variant: 'destructive',
       });
       setIsDeleting(false);
@@ -398,3 +401,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    

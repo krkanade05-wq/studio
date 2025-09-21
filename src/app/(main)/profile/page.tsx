@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, User } from 'firebase/auth';
 import { app, db } from '@/lib/firebase/firebase';
-import { doc, getDoc, setDoc, collection, getCount } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, getCountFromServer } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -89,7 +89,7 @@ export default function ProfilePage() {
   const fetchHistoryCount = async (userId: string) => {
     try {
         const historyCollection = collection(db, `users/${userId}/history`);
-        const snapshot = await getCount(historyCollection);
+        const snapshot = await getCountFromServer(historyCollection);
         setTotalChecks(snapshot.data().count);
     } catch (error) {
         console.error("Error fetching history count:", error);
@@ -441,5 +441,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    

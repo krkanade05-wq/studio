@@ -44,7 +44,7 @@ export function GoogleSignInButton({
         title: 'Sign In Successful',
         description: `Welcome, ${user.displayName || 'User'}!`,
       });
-      router.push('/dashboard');
+      router.push('/home');
     } catch (error: any) {
       console.error('Google Sign-In Error', error);
       // Handle specific errors

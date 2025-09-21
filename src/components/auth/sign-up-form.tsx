@@ -66,7 +66,7 @@ export function SignUpForm() {
         title: 'Account Created',
         description: "You've successfully created an account.",
       });
-      router.push('/dashboard');
+      router.push('/home');
     } catch (error: any) {
       console.error("Sign Up Error", error);
        let description = "Could not create your account. Please try again.";

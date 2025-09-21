@@ -129,7 +129,7 @@ const useLoading = () => {
 const NavButton = ({ href, children, tooltip }: { href: string; children: React.ReactNode, tooltip: {children: string} }) => {
   const pathname = usePathname();
   const { showLoading } = useLoading();
-  const isActive = pathname === href || (href.startsWith('/dashboard') && pathname.startsWith('/dashboard'));
+  const isActive = pathname.startsWith(href);
 
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {

@@ -59,7 +59,7 @@ export function SignInForm() {
         title: 'Sign In Successful',
         description: 'Welcome back!',
       });
-      router.push('/dashboard');
+      router.push('/home');
     } catch (error: any) {
       console.error('Sign In Error', error);
       let description = 'Could not sign in. Please check your credentials.';

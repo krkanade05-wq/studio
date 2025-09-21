@@ -1,27 +1,29 @@
-import { headers } from 'next/headers';
-import { shouldOfferGoogleSignIn } from '@/ai/flows/conditional-google-sign-in';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { getGoogleSignInOffer } from '@/app/actions/auth';
 import { GoogleSignInButton } from './google-signin-button';
 
-export async function GoogleSignIn() {
-  const headerList = headers();
-  const countryCode = headerList.get('x-vercel-ip-country') || 'US';
+export function GoogleSignIn() {
+  const [offerGoogleSignIn, setOfferGoogleSignIn] = useState<boolean | null>(
+    null
+  );
 
-  let offerGoogleSignIn = true;
-  let reason = '';
+  useEffect(() => {
+    getGoogleSignInOffer().then((result) => {
+      setOfferGoogleSignIn(result.offerGoogleSignIn);
+      if (!result.offerGoogleSignIn) {
+        console.log(
+          `Google Sign-In not offered. Reason: ${result.reason}`
+        );
+      }
+    });
+  }, []);
 
-  try {
-    const result = await shouldOfferGoogleSignIn({ countryCode });
-    offerGoogleSignIn = result.offerGoogleSignIn;
-    reason = result.reason || '';
-  } catch (error) {
-    console.error('Failed to check Google Sign-In availability:', error);
-    // Default to showing the button if the AI check fails, to not block users.
-    offerGoogleSignIn = true;
-  }
-
-  if (!offerGoogleSignIn) {
-    console.log(
-      `Google Sign-In not offered for country ${countryCode}. Reason: ${reason}`
+  if (offerGoogleSignIn === null) {
+    // You can render a skeleton or loader here
+    return (
+      <div className="h-10 w-full animate-pulse rounded-md bg-muted"></div>
     );
   }
 

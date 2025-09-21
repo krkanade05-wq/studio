@@ -29,7 +29,7 @@ export function GoogleSignInButton({
   return (
     <Button type="button" variant="outline" className="w-full">
       <GoogleIcon />
-      Continue with Google
+      <span className='ml-2'>Continue with Google</span>
     </Button>
   );
 }

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -25,6 +26,7 @@ import {
 } from '@/components/ui/card';
 import { GoogleSignIn } from './google-signin';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '../ui/skeleton';
 
 const FormSchema = z.object({
   name: z.string().min(2, {
@@ -126,7 +128,9 @@ export function SignUpForm() {
             </span>
           </div>
         </div>
-        <GoogleSignIn />
+        <Suspense fallback={<Skeleton className="h-10 w-full" />}>
+          <GoogleSignIn />
+        </Suspense>
       </CardContent>
       <CardFooter className="flex justify-center">
         <div className="text-sm text-muted-foreground">

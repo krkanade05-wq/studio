@@ -41,6 +41,7 @@ type DialogState = {
     title: string;
     description: string;
     isError?: boolean;
+    onClose?: () => void;
 };
 
 export default function ProfilePage() {
@@ -154,11 +155,13 @@ export default function ProfilePage() {
         setUser({ ...auth.currentUser });
       }
       
-      toast({
+      setDialog({
+        isOpen: true,
         title: 'Success',
         description: 'Your profile has been updated.',
+        isError: false,
+        onClose: () => setIsEditing(false)
       });
-      setIsEditing(false);
     } catch (error: any) {
       toast({
         title: 'Error updating profile',
@@ -196,22 +199,21 @@ export default function ProfilePage() {
         title: 'Success',
         description: 'Your password has been changed successfully.',
         isError: false,
+        onClose: handlePasswordEditToggle
       });
 
     } catch (error: any) {
-      let description = 'An unexpected error occurred. Please try again.';
       if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-        description = 'The current password you entered is incorrect.';
          setDialog({
             isOpen: true,
             title: 'Incorrect Password',
-            description: description,
+            description: 'The current password you entered is incorrect.',
             isError: true,
         });
       } else {
          toast({
             title: 'Error changing password',
-            description: description,
+            description: 'An unexpected error occurred. Please try again.',
             variant: 'destructive',
         });
       }
@@ -248,8 +250,8 @@ export default function ProfilePage() {
   };
   
   const closeDialog = () => {
-    if (!dialog.isError) {
-        handlePasswordEditToggle();
+    if (dialog.onClose) {
+      dialog.onClose();
     }
     setDialog({ isOpen: false, title: '', description: '' });
   }

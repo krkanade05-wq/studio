@@ -6,6 +6,8 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { app } from '@/lib/firebase/firebase';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -41,6 +43,7 @@ const FormSchema = z.object({
 export function SignInForm() {
   const { toast } = useToast();
   const router = useRouter();
+  const auth = getAuth(app);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -49,13 +52,28 @@ export function SignInForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log(data);
-    toast({
-      title: 'Sign In Successful',
-      description: 'Welcome back!',
-    });
-    router.push('/dashboard');
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    try {
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      toast({
+        title: 'Sign In Successful',
+        description: 'Welcome back!',
+      });
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error('Sign In Error', error);
+      let description = 'Could not sign in. Please check your credentials.';
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        description = 'Invalid email or password. Please try again.';
+      } else if (error.code === 'auth/invalid-credential') {
+        description = 'Invalid email or password. Please try again.';
+      }
+      toast({
+        title: 'Sign In Failed',
+        description: description,
+        variant: 'destructive',
+      });
+    }
   }
 
   return (

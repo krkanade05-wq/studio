@@ -6,6 +6,8 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { app } from '@/lib/firebase/firebase';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -44,6 +46,7 @@ const FormSchema = z.object({
 export function SignUpForm() {
   const { toast } = useToast();
   const router = useRouter();
+  const auth = getAuth(app);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -53,13 +56,29 @@ export function SignUpForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log(data);
-    toast({
-      title: 'Account Created',
-      description: "You've successfully created an account.",
-    });
-    router.push('/dashboard');
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      await updateProfile(userCredential.user, {
+        displayName: data.name
+      });
+      toast({
+        title: 'Account Created',
+        description: "You've successfully created an account.",
+      });
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error("Sign Up Error", error);
+       let description = "Could not create your account. Please try again.";
+      if (error.code === 'auth/email-already-in-use') {
+        description = 'This email is already in use. Please sign in instead.';
+      }
+      toast({
+        title: 'Sign Up Failed',
+        description: description,
+        variant: 'destructive',
+      });
+    }
   }
 
   return (

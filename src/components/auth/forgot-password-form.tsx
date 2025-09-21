@@ -4,6 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Link from 'next/link';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import { app } from '@/lib/firebase/firebase';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +35,7 @@ const FormSchema = z.object({
 
 export function ForgotPasswordForm() {
   const { toast } = useToast();
+  const auth = getAuth(app);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -40,13 +43,22 @@ export function ForgotPasswordForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log(data);
-    toast({
-      title: 'Password Reset Requested',
-      description: `If an account exists for ${data.email}, a password reset link has been sent.`,
-    });
-    form.reset();
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    try {
+      await sendPasswordResetEmail(auth, data.email);
+      toast({
+        title: 'Password Reset Email Sent',
+        description: `If an account exists for ${data.email}, a password reset link has been sent.`,
+      });
+      form.reset();
+    } catch (error: any) {
+      console.error('Password Reset Error', error);
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
   }
 
   return (

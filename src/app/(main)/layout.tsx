@@ -320,7 +320,7 @@ function MainLayout({
                 <header className="flex h-14 items-center justify-between border-b bg-card px-4">
                 <div className="flex items-center gap-2 font-semibold">
                     <ShieldCheck className="h-6 w-6 text-primary" />
-                    <span className="">Content Checker</span>
+                    <span className="">MythBuster AI</span>
                 </div>
                 <div className="md:hidden">
                     <SidebarTrigger>

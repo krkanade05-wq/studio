@@ -1,11 +1,10 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, User } from 'firebase/auth';
 import { app, db } from '@/lib/firebase/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -32,6 +31,11 @@ import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
+type UserProfile = {
+  mobile?: string;
+  address?: string;
+};
+
 export default function ProfilePage() {
   const auth = getAuth(app);
   const { toast } = useToast();
@@ -40,23 +44,30 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+
+  const [profileData, setProfileData] = useState<UserProfile>({});
+  const [mobile, setMobile] = useState('');
+  const [address, setAddress] = useState('');
+  
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
   const [totalChecks, setTotalChecks] = useState(0);
 
+  const [isEditing, setIsEditing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         setName(currentUser.displayName || '');
         setEmail(currentUser.email || '');
-        fetchHistoryCount(currentUser.uid);
+        await fetchHistoryCount(currentUser.uid);
+        await fetchUserProfile(currentUser.uid);
       } else {
         router.push('/sign-in');
       }
@@ -75,17 +86,53 @@ export default function ProfilePage() {
     }
   }
 
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const docRef = doc(db, 'users', userId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data() as UserProfile;
+        setProfileData(data);
+        setMobile(data.mobile || '');
+        setAddress(data.address || '');
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  };
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // If canceling, reset fields to their original state
+      setName(user?.displayName || '');
+      setMobile(profileData.mobile || '');
+      setAddress(profileData.address || '');
+    }
+    setIsEditing(!isEditing);
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     setIsUpdating(true);
     try {
-      await updateProfile(user, { displayName: name });
+      // Update display name in Auth
+      if (name !== user.displayName) {
+        await updateProfile(user, { displayName: name });
+      }
+
+      // Update mobile and address in Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      await setDoc(userDocRef, { mobile, address }, { merge: true });
+
+      await fetchUserProfile(user.uid);
+
       toast({
         title: 'Success',
         description: 'Your profile has been updated.',
       });
+      setIsEditing(false);
     } catch (error: any) {
       toast({
         title: 'Error updating profile',
@@ -96,6 +143,7 @@ export default function ProfilePage() {
       setIsUpdating(false);
     }
   };
+
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,16 +249,40 @@ export default function ProfilePage() {
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} disabled={!isEditing} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" value={email} disabled />
               </div>
-              <Button type="submit" disabled={isUpdating}>
-                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Update Profile
-              </Button>
+               {isEditing && (
+                <>
+                    <div className="space-y-2">
+                        <Label htmlFor="mobile">Mobile Number</Label>
+                        <Input id="mobile" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="Enter your mobile number" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="address">Address</Label>
+                        <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter your address" />
+                    </div>
+                </>
+               )}
+              <div className="flex gap-2">
+                {isEditing ? (
+                  <>
+                    <Button type="submit" disabled={isUpdating}>
+                      {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Save Changes'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={handleEditToggle}>
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <Button type="button" onClick={handleEditToggle}>
+                    Edit Profile
+                  </Button>
+                )}
+              </div>
             </form>
           </CardContent>
         </Card>
@@ -282,5 +354,4 @@ export default function ProfilePage() {
   );
 }
 
-
-
+    

@@ -38,18 +38,21 @@ import {
   Loader2,
   Type,
   Upload,
+  BarChart,
 } from 'lucide-react';
 import { useState, useEffect, useActionState, useRef } from 'react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 
 import AnalysisResult from '@/components/home/analysis-result';
-import TrendingReports from '@/components/home/trending-reports';
 import { useContentChecker } from '@/contexts/content-checker-context';
 import { auth } from '@/lib/firebase/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { reportContentAction, ReportState } from '@/app/actions/report-content-action';
 import { Label } from '@/components/ui/label';
+import { getTrendingReports } from '@/ai/flows/get-trending-reports-flow';
+import type { TrendingReport } from '@/ai/flows/get-trending-reports-flow';
+import { Badge } from '@/components/ui/badge';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -299,6 +302,78 @@ function ReportContent() {
 }
 
 
+function TrendingReports() {
+  const [trending, setTrending] = useState<TrendingReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const reports = await getTrendingReports();
+        setTrending(reports);
+      } catch (err) {
+        console.error('Error fetching trending reports:', err);
+        setError('Could not load trending reports.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrending();
+    const interval = setInterval(fetchTrending, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <BarChart className="mr-2 h-5 w-5" />
+          Trending Reports
+        </CardTitle>
+        <CardDescription>
+          Most reported content in the last 24 hours.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <div className="flex justify-center items-center h-24">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        ) : error ? (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : trending.length === 0 ? (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>No Trending Reports</AlertTitle>
+            <AlertDescription>
+              There are no trending reports in the last 24 hours.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <ul className="space-y-4">
+            {trending.map((report, index) => (
+              <li key={index} className="flex items-start justify-between">
+                <span className="text-sm text-muted-foreground truncate pr-4">
+                  {index + 1}. {report.content}
+                </span>
+                <Badge variant="secondary">{report.count} reports</Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+
 export default function AppRootPage() {
   const { analysisState } = useContentChecker();
   
@@ -333,3 +408,5 @@ export default function AppRootPage() {
       </div>
   );
 }
+
+    

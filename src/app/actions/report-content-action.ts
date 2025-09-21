@@ -36,7 +36,9 @@ export async function reportContentAction(
   const { userId, content, description } = validatedFields.data;
 
   try {
-    await addDoc(collection(db, `users/${userId}/reports`), {
+    // Save to a global 'reports' collection for trending analysis
+    await addDoc(collection(db, `reports`), {
+      userId,
       content,
       description,
       timestamp: serverTimestamp(),
@@ -48,3 +50,5 @@ export async function reportContentAction(
     return { status: 'error', message: 'Failed to submit report. Please try again.' };
   }
 }
+
+    

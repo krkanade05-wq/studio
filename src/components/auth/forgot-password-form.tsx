@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -49,9 +50,10 @@ export function ForgotPasswordForm() {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
       await sendPasswordResetEmail(auth, data.email);
+      console.log(`Password reset email sent to: ${data.email}`);
       toast({
         title: 'Password Reset Email Sent',
-        description: `If an account exists for ${data.email}, a password reset link has been sent.`,
+        description: `If an account exists for ${data.email}, you will receive a password reset link. Please check your spam or junk folder if you don't see it.`,
       });
       form.reset();
     } catch (error: any) {

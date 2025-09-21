@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, User } from 'firebase/auth';
 import { app, db } from '@/lib/firebase/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, getCount } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -36,6 +36,12 @@ type UserProfile = {
   address?: string;
 };
 
+type ErrorDialogState = {
+    isOpen: boolean;
+    title: string;
+    description: string;
+};
+
 export default function ProfilePage() {
   const auth = getAuth(app);
   const { toast } = useToast();
@@ -60,6 +66,8 @@ export default function ProfilePage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const [errorDialog, setErrorDialog] = useState<ErrorDialogState>({ isOpen: false, title: '', description: '' });
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -79,7 +87,13 @@ export default function ProfilePage() {
   }, [auth, router]);
 
   const fetchHistoryCount = async (userId: string) => {
-    // This part is removed as there is no history collection for each user
+    try {
+        const historyCollection = collection(db, `users/${userId}/history`);
+        const snapshot = await getCount(historyCollection);
+        setTotalChecks(snapshot.data().count);
+    } catch (error) {
+        console.error("Error fetching history count:", error);
+    }
   }
 
   const fetchUserProfile = async (userId: string) => {
@@ -134,8 +148,11 @@ export default function ProfilePage() {
       await fetchUserProfile(user.uid);
       
       // Manually update user displayName in local state to re-render layout
-      setUser({...user, displayName: name});
-
+      if (auth.currentUser) {
+        // Create a new object to force re-render
+        setUser({ ...auth.currentUser });
+      }
+      
       toast({
         title: 'Success',
         description: 'Your profile has been updated.',
@@ -158,10 +175,10 @@ export default function ProfilePage() {
     if (!user || !user.email) return;
 
     if (newPassword !== confirmPassword) {
-      toast({
-        title: 'Error',
-        description: 'New passwords do not match.',
-        variant: 'destructive',
+      setErrorDialog({
+        isOpen: true,
+        title: 'Password Mismatch',
+        description: 'The new and confirmed passwords do not match. Please try again.'
       });
       return;
     }
@@ -180,12 +197,18 @@ export default function ProfilePage() {
       let description = 'An unexpected error occurred. Please try again.';
       if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         description = 'The current password you entered is incorrect.';
+         setErrorDialog({
+            isOpen: true,
+            title: 'Incorrect Password',
+            description: description,
+        });
+      } else {
+         toast({
+            title: 'Error changing password',
+            description: description,
+            variant: 'destructive',
+        });
       }
-      toast({
-        title: 'Error changing password',
-        description: description,
-        variant: 'destructive',
-      });
     } finally {
       setIsUpdating(false);
     }
@@ -398,6 +421,23 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </main>
+
+        <AlertDialog open={errorDialog.isOpen} onOpenChange={(isOpen) => !isOpen && setErrorDialog({ isOpen: false, title: '', description: ''})}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>{errorDialog.title}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {errorDialog.description}
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogAction onClick={() => setErrorDialog({ isOpen: false, title: '', description: ''})}>
+                        OK
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
     </div>
   );
 }

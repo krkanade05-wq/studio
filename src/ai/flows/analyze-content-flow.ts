@@ -12,7 +12,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const AnalyzeContentInputSchema = z.object({
+const AnalyzeContentInputSchema = z.object({
   text: z.string().optional().describe('The text content to analyze.'),
   url: z.string().optional().describe('The URL of the content to analyze.'),
   photoDataUri: z.string().optional().describe("A photo of the content, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),

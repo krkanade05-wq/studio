@@ -20,7 +20,7 @@ const AnalyzeContentInputSchema = z.object({
 });
 
 
-export const GenerateReplyInputSchema = z.object({
+const GenerateReplyInputSchema = z.object({
   originalContent: AnalyzeContentInputSchema.optional(),
   verdict: z.enum(['Likely True', 'Likely False', 'Unverifiable']),
   explanation: z.string(),

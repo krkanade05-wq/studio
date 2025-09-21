@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getGoogleSignInOffer } from '@/app/actions/auth';
 import { GoogleSignInButton } from './google-signin-button';
+import { Skeleton } from '../ui/skeleton';
 
 export function GoogleSignIn() {
   const [offerGoogleSignIn, setOfferGoogleSignIn] = useState<boolean | null>(
@@ -21,9 +22,8 @@ export function GoogleSignIn() {
   }, []);
 
   if (offerGoogleSignIn === null) {
-    // You can render a skeleton or loader here
     return (
-      <div className="h-10 w-full animate-pulse rounded-md bg-muted"></div>
+      <Skeleton className="h-10 w-full" />
     );
   }
 

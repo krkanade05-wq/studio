@@ -9,8 +9,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
-    BarChart,
-    LineChart,
     Users,
     FileText,
     AlertCircle,
@@ -18,10 +16,9 @@ import {
 } from 'lucide-react';
 import {
   ChartContainer,
-  ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { Bar, CartesianGrid, XAxis, YAxis, Line, Tooltip } from 'recharts';
+import { BarChart, Bar, CartesianGrid, XAxis, YAxis, LineChart, Line, Tooltip } from 'recharts';
 
 const chartData = [
   { month: 'January', reports: 186, verifications: 80 },

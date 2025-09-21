@@ -28,7 +28,7 @@ export type VerificationInput = z.infer<typeof VerificationInputSchema>;
 const VerificationOutputSchema = z.object({
     isCorrect: z.boolean().describe('Whether the user\'s guess was correct.'),
     correctAnswer: z.enum(['Real', 'Fake']).describe('The correct answer for the statement.'),
-    explanation: z.string().describe('A short explanation (2-3 lines) of why the statement is real or fake.'),
+    explanation: z.string().describe('A short explanation (2-3 lines) of why the statement is real or fake, or why it is a common scam/misinformation tactic.'),
 });
 export type VerificationOutput = z.infer<typeof VerificationOutputSchema>;
 
@@ -48,7 +48,15 @@ export async function verifyStatement(input: VerificationInput): Promise<Verific
 const generateStatementPrompt = ai.definePrompt({
   name: 'generateStatementPrompt',
   output: { schema: StatementOutputSchema },
-  prompt: `You are the Question Generator for a misinformation-detection game. Generate a single, short, clear statement that may be either true or false based on real-world knowledge, current events, or general facts. The statement should be 1-2 sentences long and not too complex. Randomly vary between real and fake statements. Do not reveal the answer.`,
+  prompt: `You are the Question Generator for a misinformation-detection game. Generate a single, short, clear statement that is either true ('Real') or false ('Fake').
+  The statements should be related to common online misinformation, spam, scams, or misleading facts.
+  - Topics can include fake health claims, phishing email characteristics, social media rumors, or common financial scams.
+  - The statement should be 1-2 sentences long and not too complex.
+  - Randomly vary between real and fake statements.
+  - Do not reveal the answer.
+  
+  Example Fake Statement: "You can get a free government grant by providing your bank details on a linked website."
+  Example Real Statement: "Your bank will never ask for your password or full debit card number over email."`,
 });
 
 
@@ -63,10 +71,10 @@ const verifyStatementPrompt = ai.definePrompt({
 
     The user guessed that the statement is: {{{userGuess}}}
 
-    First, determine if the statement is 'Real' or 'Fake'.
+    First, determine if the statement is 'Real' (a true fact or legitimate practice) or 'Fake' (a piece of misinformation, a scam, or a false claim).
     Then, determine if the user's guess was correct.
-    Finally, provide a short, simple explanation (2-3 lines) for the correct answer. Do not start with "The statement is...".
-    `,
+    Finally, provide a short, simple explanation (2-3 lines) for the correct answer. The explanation should be educational and help the user spot similar issues in the future.
+    Do not start the explanation with "The statement is...".`,
 });
 
 // Flow to generate a statement

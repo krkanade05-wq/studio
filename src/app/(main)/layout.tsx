@@ -231,11 +231,6 @@ function MainLayout({
             <SidebarProvider>
             <Sidebar>
                 <SidebarContent>
-                <SidebarHeader>
-                    <div className="flex items-center gap-2">
-                    <ShieldCheck className="h-6 w-6 text-primary" />
-                    </div>
-                </SidebarHeader>
 
                 {user && (
                     <div className="p-4 border-b border-sidebar-border">
@@ -328,6 +323,7 @@ function WrappedMainLayout(props: { children: React.ReactNode }) {
 }
 
 export default WrappedMainLayout;
+
 
 
 

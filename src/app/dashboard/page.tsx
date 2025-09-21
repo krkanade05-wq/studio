@@ -20,6 +20,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Upload, CheckCircle, XCircle, AlertCircle, BarChart, FileText, Link as LinkIcon, Loader2, Flag, Info, BookCheck } from 'lucide-react';
 import { analyzeContent, AnalyzeContentOutput } from '@/ai/flows/analyze-content-flow';
 import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
 
 export default function DashboardPage() {
   const { toast } = useToast();
@@ -245,12 +246,38 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
              )}
-             
-            <Button variant="outline" className="w-full border-destructive text-destructive hover:bg-destructive/5 hover:text-destructive">
-                <Flag className="mr-2 h-4 w-4" /> Report as Misinformation
-            </Button>
             </>
           )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Report Content</CardTitle>
+              <CardDescription>
+                If you believe content is misleading or spam, please report it.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="report-content">Content to Report</Label>
+                <Textarea
+                  id="report-content"
+                  placeholder="Paste text, news URLs, etc."
+                  className="min-h-[150px]"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="report-description">Description (Optional)</Label>
+                <Textarea
+                  id="report-description"
+                  placeholder="Why do you want to report this content?"
+                />
+              </div>
+              <Button className="w-full">
+                <Flag className="mr-2 h-4 w-4" />
+                Report
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="lg:col-span-1 space-y-8">

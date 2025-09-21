@@ -30,7 +30,7 @@ import {
   Type,
   Upload,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 
@@ -39,6 +39,7 @@ import TrendingReports from '@/components/home/trending-reports';
 import ReportContent from '@/components/home/report-content';
 import { useContentChecker } from '@/contexts/content-checker-context';
 import { auth } from '@/lib/firebase/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -59,6 +60,14 @@ function ContentChecker() {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [imageError, setImageError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState('text');
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+        return () => unsubscribe();
+    }, []);
   
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
@@ -81,15 +90,6 @@ function ContentChecker() {
       }
     };
   
-    // We need to pass the user id to the server action
-    const formActionWithUserId = (formData: FormData) => {
-        const userId = auth.currentUser?.uid;
-        if(userId) {
-            formData.append('userId', userId);
-        }
-        formAction(formData);
-    }
-
     return (
       <div className="space-y-8">
         <Card>
@@ -102,7 +102,8 @@ function ContentChecker() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={formActionWithUserId}>
+            <form action={formAction}>
+                {user && <input type="hidden" name="userId" value={user.uid} />}
               <Tabs
                 defaultValue="text"
                 value={activeTab}

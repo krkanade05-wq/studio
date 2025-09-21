@@ -5,7 +5,7 @@ import {
   AnalyzeContentOutput,
   AnalyzeContentInput,
 } from '@/ai/flows/analyze-content-flow';
-import { auth, db } from '@/lib/firebase/firebase';
+import { db } from '@/lib/firebase/firebase';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 export type AnalysisState = {
@@ -18,7 +18,7 @@ export type AnalysisState = {
 
 async function saveToHistory(userId: string, input: AnalyzeContentInput, result: AnalyzeContentOutput) {
     if (!userId) {
-        console.log("No user ID provided, skipping history save.");
+        console.warn("No user ID provided, skipping history save.");
         return;
     }
     try {
@@ -39,7 +39,7 @@ export async function checkContentAction(
 ): Promise<AnalysisState> {
   const contentType = formData.get('contentType') as string;
   const content = formData.get('content') as string;
-  const userId = auth.currentUser?.uid; // This will still be null on the server. Let's fix this properly.
+  const userId = formData.get('userId') as string | null;
 
   let analysisInput: AnalyzeContentInput = {};
 
@@ -69,23 +69,11 @@ export async function checkContentAction(
   try {
     const result = await analyzeContent(analysisInput);
     
-    // The user object is not available in server actions this way.
-    // A proper implementation would involve passing the user's ID token or using a server-side auth library.
-    // For now, let's simulate this by assuming we can get the user ID.
-    // A robust solution is needed here.
-    // This is a placeholder for a real auth solution on the server.
-    const currentUserId = auth.currentUser ? auth.currentUser.uid : null;
-
-    if (currentUserId) {
-        await addDoc(collection(db, `users/${currentUserId}/history`), {
-            ...analysisInput,
-            ...result,
-            timestamp: serverTimestamp()
-        });
+    if (userId) {
+        await saveToHistory(userId, analysisInput, result);
     } else {
         console.log("User not authenticated, skipping history save.");
     }
-
 
     return {
       status: 'success',

@@ -288,6 +288,9 @@ function MainLayout({
                         </Button>
                     </SidebarMenuItem>
                     </SidebarMenu>
+                     <div className="p-4 text-xs text-center text-sidebar-foreground/50">
+                        &copy; 2025
+                    </div>
                 </div>
                 </SidebarContent>
             </Sidebar>
@@ -313,7 +316,6 @@ function MainLayout({
   );
 }
 
-// Wrapping MainLayout in a new component to use the useAuth hook inside a child of AuthProvider
 function WrappedMainLayout(props: { children: React.ReactNode }) {
     return (
         <AuthProvider>
@@ -323,6 +325,7 @@ function WrappedMainLayout(props: { children: React.ReactNode }) {
 }
 
 export default WrappedMainLayout;
+
 
 
 

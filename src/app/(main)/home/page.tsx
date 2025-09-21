@@ -39,9 +39,9 @@ import {
   Type,
   Upload,
 } from 'lucide-react';
-import { useState, useEffect, useActionState } from 'react';
+import { useState, useEffect, useActionState, useRef } from 'react';
 import Image from 'next/image';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 
 import AnalysisResult from '@/components/home/analysis-result';
 import TrendingReports from '@/components/home/trending-reports';
@@ -207,13 +207,12 @@ function ContentChecker() {
 
 function ReportContent() {
     const initialState: ReportState = { status: 'idle' };
-    const [state, formAction] = useFormState(reportContentAction, initialState);
-    const { pending } = useFormStatus();
+    const [state, formAction] = useActionState(reportContentAction, initialState);
     
     const [user, setUser] = useState<User | null>(null);
     const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     
-    const formRef = React.useRef<HTMLFormElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -228,6 +227,21 @@ function ReportContent() {
             formRef.current?.reset();
         }
     }, [state]);
+
+    // useFormStatus needs to be used within a form
+    function ReportButton() {
+        const { pending } = useFormStatus();
+        return (
+             <Button type="submit" disabled={pending || !user} className="w-full">
+                {pending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <Flag className="mr-2 h-4 w-4" />
+                )}
+                Report
+            </Button>
+        )
+    }
 
   return (
     <>
@@ -259,14 +273,7 @@ function ReportContent() {
                     placeholder="Why do you want to report this content?"
                 />
             </div>
-            <Button type="submit" disabled={pending || !user} className="w-full">
-                {pending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                    <Flag className="mr-2 h-4 w-4" />
-                )}
-                Report
-            </Button>
+            <ReportButton />
             {state.status === 'error' && state.message && (
                 <p className="text-sm text-destructive">{state.message}</p>
             )}

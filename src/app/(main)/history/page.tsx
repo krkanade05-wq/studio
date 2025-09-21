@@ -266,14 +266,14 @@ export default function HistoryPage() {
               <AccordionItem value={item.id} key={item.id} className='border-b-0'>
                 <Card>
                   <AccordionTrigger className="p-6 hover:no-underline">
-                     <div className="flex w-full items-start justify-between">
-                        <div className='text-left'>
+                     <div className="flex w-full items-start justify-between gap-4">
+                        <div className='text-left flex-grow'>
                           <CardTitle className="mb-1 text-base">{renderQuery(item)}</CardTitle>
                           <CardDescription>
                             {item.timestamp?.toDate().toLocaleString()}
                           </CardDescription>
                         </div>
-                        <Badge variant={getVerdictBadgeVariant(item.verdict)} className="ml-4">
+                        <Badge variant={getVerdictBadgeVariant(item.verdict)} className="ml-4 flex-shrink-0">
                           {item.verdict}
                         </Badge>
                       </div>

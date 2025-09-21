@@ -11,11 +11,11 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { AnalyzeContentInput } from './analyze-content-flow';
+import { AnalyzeContentInputSchema } from './analyze-content-flow';
 
 
 export const GenerateReplyInputSchema = z.object({
-  originalContent: AnalyzeContentInput.optional(),
+  originalContent: AnalyzeContentInputSchema.optional(),
   verdict: z.enum(['Likely True', 'Likely False', 'Unverifiable']),
   explanation: z.string(),
 });

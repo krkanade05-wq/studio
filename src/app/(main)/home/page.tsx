@@ -23,23 +23,33 @@ import {
   AlertTitle,
 } from '@/components/ui/alert';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   AlertCircle,
+  Flag,
   Image as ImageIcon,
   Link as LinkIcon,
   Loader2,
   Type,
   Upload,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useActionState } from 'react';
 import Image from 'next/image';
-import { useFormStatus } from 'react-dom';
+import { useFormState, useFormStatus } from 'react-dom';
 
 import AnalysisResult from '@/components/home/analysis-result';
 import TrendingReports from '@/components/home/trending-reports';
-import ReportContent from '@/components/home/report-content';
 import { useContentChecker } from '@/contexts/content-checker-context';
 import { auth } from '@/lib/firebase/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
+import { reportContentAction, ReportState } from '@/app/actions/report-content-action';
+import { Label } from '@/components/ui/label';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -194,6 +204,93 @@ function ContentChecker() {
       </div>
     );
   }
+
+function ReportContent() {
+    const initialState: ReportState = { status: 'idle' };
+    const [state, formAction] = useFormState(reportContentAction, initialState);
+    const { pending } = useFormStatus();
+    
+    const [user, setUser] = useState<User | null>(null);
+    const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+    
+    const formRef = React.useRef<HTMLFormElement>(null);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        if (state.status === 'success') {
+            setShowSuccessDialog(true);
+            formRef.current?.reset();
+        }
+    }, [state]);
+
+  return (
+    <>
+    <Card>
+      <CardHeader>
+        <CardTitle>Report Content</CardTitle>
+        <CardDescription>
+          If you believe content is misleading or spam, please report it.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form ref={formRef} action={formAction} className="space-y-4">
+            {user && <input type="hidden" name="userId" value={user.uid} />}
+            <div className="space-y-2">
+                <Label htmlFor="report-content">Content to Report</Label>
+                <Textarea
+                    id="report-content"
+                    name="content"
+                    placeholder="Paste text, news URLs, etc."
+                    className="min-h-[150px]"
+                    required
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="report-description">Description (Optional)</Label>
+                <Textarea
+                    id="report-description"
+                    name="description"
+                    placeholder="Why do you want to report this content?"
+                />
+            </div>
+            <Button type="submit" disabled={pending || !user} className="w-full">
+                {pending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <Flag className="mr-2 h-4 w-4" />
+                )}
+                Report
+            </Button>
+            {state.status === 'error' && state.message && (
+                <p className="text-sm text-destructive">{state.message}</p>
+            )}
+        </form>
+      </CardContent>
+    </Card>
+
+    <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Report Submitted</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Thank you for reporting.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogAction onClick={() => setShowSuccessDialog(false)}>
+                Close
+            </AlertDialogAction>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
+  );
+}
+
 
 export default function AppRootPage() {
   const { analysisState } = useContentChecker();

@@ -1,3 +1,4 @@
+
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -7,7 +8,7 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  "apiKey": "AIzaSyDis2q5AQb3PxxUKF54cTOIWeaTO1BIllw",
+  "apiKey": "AIzaSyALTWBrB0s_-BrXXd5KbmBN6roSOloyIFE",
   "authDomain": "studio-8182373574-a1bcb.firebaseapp.com",
   "projectId": "studio-8182373574-a1bcb",
   "storageBucket": "studio-8182373574-a1bcb.appspot.com",

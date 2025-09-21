@@ -140,7 +140,7 @@ export default function GamePage() {
           <CardHeader>
             <CardTitle className="text-3xl font-bold flex items-center gap-3">
               <Gamepad2 className="h-8 w-8" />
-              Real or Fake? The Game
+              Gamified learning
             </CardTitle>
             <CardDescription>
               Test your ability to spot misinformation, spam, and scams.

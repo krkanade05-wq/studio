@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -45,6 +46,7 @@ import { getAuth, signOut, onAuthStateChanged, User as FirebaseUser } from 'fire
 import { app } from '@/lib/firebase/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { ContentCheckerProvider } from '@/contexts/content-checker-context';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 type LoadingContextType = {
@@ -55,7 +57,17 @@ type LoadingContextType = {
 
 const LoadingContext = createContext<LoadingContextType | null>(null);
 
-function AuthGuard({ children }: { children: React.ReactNode }) {
+const AuthContext = createContext<{ user: FirebaseUser | null }>({ user: null });
+
+const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};
+
+function AuthProvider({ children }: { children: React.ReactNode }) {
     const auth = getAuth(app);
     const router = useRouter();
     const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -86,7 +98,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
         return null; // The redirect is handled in the effect
     }
 
-    return <>{children}</>;
+    return <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>;
 }
 
 
@@ -197,6 +209,7 @@ export default function MainLayout({
   const router = useRouter();
   const { toast } = useToast();
   const auth = getAuth(app);
+  const { user } = useAuth();
 
   const handleSignOut = async () => {
     try {
@@ -214,7 +227,7 @@ export default function MainLayout({
 
   return (
     <LoadingProvider>
-        <AuthGuard>
+        <AuthProvider>
             <SidebarProvider>
             <Sidebar>
                 <SidebarContent>
@@ -224,6 +237,22 @@ export default function MainLayout({
                     <h1 className="text-xl font-semibold">Content Checker</h1>
                     </div>
                 </SidebarHeader>
+
+                {user && (
+                    <div className="p-4 border-b border-sidebar-border">
+                        <div className="flex items-center gap-3">
+                            <Avatar>
+                                <AvatarImage src={user.photoURL ?? undefined} alt={user.displayName ?? 'User'} />
+                                <AvatarFallback>{user.displayName?.[0] ?? 'U'}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="text-sm font-medium text-sidebar-primary">{user.displayName}</p>
+                                <p className="text-xs text-sidebar-foreground/70">{user.email}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <NavButton href="/home" tooltip={{ children: 'Home' }}>
@@ -283,7 +312,21 @@ export default function MainLayout({
                 </ContentCheckerProvider>
             </SidebarInset>
             </SidebarProvider>
-        </AuthGuard>
+        </AuthProvider>
     </LoadingProvider>
   );
 }
+
+// Wrapping MainLayout in a new component to use the useAuth hook inside a child of AuthProvider
+function WrappedMainLayout(props: { children: React.ReactNode }) {
+    return (
+        <AuthProvider>
+            <MainLayout {...props} />
+        </AuthProvider>
+    );
+}
+
+// The final export must be a default export.
+// We are re-exporting our wrapped layout.
+export default WrappedMainLayout;
+

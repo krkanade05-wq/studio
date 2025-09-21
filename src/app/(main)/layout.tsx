@@ -5,7 +5,6 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarHeader,
   SidebarInset,
   SidebarMenu,
   SidebarMenuItem,
@@ -227,8 +226,6 @@ function MainLayout({
   };
 
   return (
-    <LoadingProvider>
-        <AuthProvider>
             <SidebarProvider>
             <Sidebar>
                 <SidebarContent>
@@ -308,20 +305,20 @@ function MainLayout({
                     </SidebarTrigger>
                 </div>
                 </header>
-                <ContentCheckerProvider>
-                    <div className="flex-1 overflow-y-auto">{children}</div>
-                </ContentCheckerProvider>
+                <div className="flex-1 overflow-y-auto">{children}</div>
             </SidebarInset>
             </SidebarProvider>
-        </AuthProvider>
-    </LoadingProvider>
   );
 }
 
 function WrappedMainLayout(props: { children: React.ReactNode }) {
     return (
         <AuthProvider>
-            <MainLayout {...props} />
+            <LoadingProvider>
+                <ContentCheckerProvider>
+                    <MainLayout {...props} />
+                </ContentCheckerProvider>
+            </LoadingProvider>
         </AuthProvider>
     );
 }

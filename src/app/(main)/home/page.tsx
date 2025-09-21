@@ -96,13 +96,19 @@ function ContentChecker() {
     }, []);
 
     useEffect(() => {
-        // Reset analysis when navigating away
+        // This effect runs when the component mounts and when pathname changes.
+        // We use a ref to track if it's the initial mount on the home page.
+        const isInitialMount = pathname === '/home';
+        
+        // The cleanup function will be called when the component unmounts
+        // (i.e., when we navigate away from the page).
         return () => {
-            if (pathname !== '/home') {
-                resetAnalysis();
-            }
+          // If we are navigating away from the home page, reset the analysis.
+          if (!isInitialMount) {
+            resetAnalysis();
+          }
         };
-    }, [pathname, resetAnalysis]);
+      }, [pathname, resetAnalysis]);
 
     const handleTabChange = (value: string) => {
       setActiveTab(value);

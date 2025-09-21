@@ -177,7 +177,7 @@ const useLoading = () => {
 const NavButton = ({ href, children, tooltip }: { href: string; children: React.ReactNode, tooltip: {children: string} }) => {
   const pathname = usePathname();
   const { showLoading } = useLoading();
-  const isActive = pathname === href || (href === '/dashboard' && pathname.startsWith('/dashboard/'));
+  const isActive = pathname === href || (href !== '/home' && pathname.startsWith(href));
 
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -260,19 +260,19 @@ function MainLayout({
                         </NavButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                        <NavButton href="/dashboard/history" tooltip={{ children: 'History' }}>
+                        <NavButton href="/history" tooltip={{ children: 'History' }}>
                             <History />
                             History
                         </NavButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                        <NavButton href="/dashboard/learn" tooltip={{ children: 'Learn' }}>
+                        <NavButton href="/learn" tooltip={{ children: 'Learn' }}>
                             <LifeBuoy />
                             Learn
                         </NavButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                        <NavButton href="/dashboard/profile" tooltip={{ children: 'Profile' }}>
+                        <NavButton href="/profile" tooltip={{ children: 'Profile' }}>
                             <User />
                             Profile
                         </NavButton>
@@ -325,3 +325,5 @@ export default function RootAuthLayout({ children }: {children: React.ReactNode}
         </AuthProvider>
     );
 }
+
+    
